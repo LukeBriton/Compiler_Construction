@@ -14,6 +14,9 @@
 
 ![Main Steps](./img/Main_steps.png "Main_steps.png")[^6]
 ![Tr0y_Frontend.png](./img/Tr0y_Frontend.png)[^7]
+
+## 安排
+
 ## 工具
 
 https://stackoverflow.com/questions/623503/what-is-the-difference-between-flex-lex-and-yacc-bison
@@ -54,6 +57,98 @@ Flex 和 Bison 是 Linux 下生成词法分析器和语法分析器的工具，�
 2. 解压后即可在解压路径通过命令行执行 win_flex 或 win_bison。
 3. 为方便在别处的使用，建议于系统环境变量的 Path 中添加解压后的路径。
 
+## Scanner(Lexical Analysis, 词法分析)[^lex]
+
+### Flex Matching is Greedy[^gre]
+
+最长最先匹配规则。
+
+[^mat]
+
+When the generated scanner is run, it analyzes its input looking for strings which match any of its patterns. If it finds more than one match, it takes the one matching the most text (for trailing context rules, this includes the length of the trailing part, even though it will then be returned to the input). If it finds two or more matches of the same length, the rule listed first in the `flex` input file is chosen.
+
+当生成的扫描器运行时，它分析其输入，寻找与其任何模式匹配的字符串。如果它找到多于一个的匹配，它会选择匹配最多文本的那个（对于后续上下文规则，这包括后续部分的长度，尽管然后它会被返回到输入中）。如果它找到两个或更多长度相同的匹配，会选择在`flex`输入文件中首先列出的规则。
+
+
+### noyywrap
+
+lex 文件中需要添加此行：
+```Flex
+%option noyywrap
+```
+
+否则：
+```Bash
+C:\Users\dell\Documents\GitHub\Compiler_Construction\Lab1-1st-Gen-Compiler\src\Scanner>gcc lex.yy.c -o Scanner_Generated.exe
+C:/Program Files/TDM-GCC-64/bin/../lib/gcc/x86_64-w64-mingw32/10.3.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\dell\AppData\Local\Temp\ccYjQcTm.o:lex.yy.c:(.text+0x543): undefined reference to `yywrap'
+C:/Program Files/TDM-GCC-64/bin/../lib/gcc/x86_64-w64-mingw32/10.3.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\dell\AppData\Local\Temp\ccYjQcTm.o:lex.yy.c:(.text+0x114a): undefined reference to `yywrap'
+collect2.exe: error: ld returned 1 exit status
+```
+
+### Flex 不支持 `\w` `\d`[^\d]
+
+清单：https://westes.github.io/flex/manual/Patterns.html
+
+In addition to characters and ranges of characters, character classes can also contain *character class expressions*. These are expressions enclosed inside ‘`[:`’ and ‘`:]`’ delimiters (which themselves must appear between the ‘`[`’ and ‘`]`’ of the character class. Other elements may occur inside the character class, too). The valid expressions are:
+
+```Flex
+    [:alnum:] [:alpha:] [:blank:]
+    [:cntrl:] [:digit:] [:graph:]
+    [:lower:] [:print:] [:punct:]
+    [:space:] [:upper:] [:xdigit:]
+```
+
+These expressions all designate a set of characters equivalent to the corresponding standard C `isXXX` function. For example, ‘`[:alnum:]`’ designates those characters for which `isalnum()` returns true - i.e., any alphabetic or numeric character. Some systems don’t provide `isblank()`, so flex defines ‘`[:blank:]`’ as a blank or a tab.
+
+### `[[:digit:]]`
+
+非常愚蠢，但是使用 character classes 需要两层`[]`
+
+否则你会得到： `[:digit:]` := `[: 或 d 或 i 或 g 或 t]`
+
+### `\b`
+
+```Flex
+%{
+#include <stdio.h>
+%}
+
+WC      [A-Za-z']
+NW      [^A-Za-z']
+
+%start      INW NIW
+
+%%
+{WC}  { BEGIN INW; REJECT; }
+{NW}  { BEGIN NIW; REJECT; }
+
+<INW>a { printf("'a' in word\n"); }
+<NIW>a { printf("'a' not in word\n"); }
+
+%%
+```
+
+
+https://stackoverflow.com/questions/406985/implement-word-boundary-states-in-flex-lex-parser-generator
+
+[Start Conditions](https://westes.github.io/flex/manual/Start-Conditions.html#Start-Conditions)
+
+
+
+### [Expressions](https://en.cppreference.com/w/c/language/expressions)
+
+
+## Parser(Syntactic Analysis, 句法分析)[^par]
+
+## Elaborator(Semantic Analysis, 语义分析)[^ela]
+
+## 备忘
+
+
+
+
+
+
 ## 教程
 
 [Flex(scanner)/Bison(parser)词法语法分析工作原理 - 知乎](https://zhuanlan.zhihu.com/p/120812270)
@@ -76,7 +171,9 @@ Flex 和 Bison 是 Linux 下生成词法分析器和语法分析器的工具，�
 
 [妮可 2023](https://ustc-compiler-principles.github.io/2023/)
 
-## 安排 
+## 相关链接
+
+[正则表达式在线测试](https://www.jyshare.com/front-end/854/)
 
 [^1]: ~~日式转写：Shodai Konpa~~
 [^2]: Engineering a Compiler 3rd ed. Page xxii
@@ -90,3 +187,9 @@ Flex 和 Bison 是 Linux 下生成词法分析器和语法分析器的工具，�
 [^10]: https://ustc-compiler-principles.github.io/2023/lab1/Flex/
 [^11]: https://www.gnu.org/software/bison/manual/html_node/Introduction.html
 [^12]: https://ustc-compiler-principles.github.io/2023/lab1/Bison/
+[^lex]: **Scanner**, **Tokenizer**, **Lexer**: https://cboard.cprogramming.com/a-brief-history-of-cprogramming-com/110518-scanner-lexical-analyzer-tokenizer.html
+[^mat]: [Flex and Bison Tutorial](https://www.cse.scu.edu/~m1wang/compiler/TutorialFlexBison.pdf) P17
+[^par]: 颇多用 syntax 修饰的，还有叫 Grammar Analysis 的, 讲道理 grammar 才是该译作“语法/文法”的。
+[^ela]: http://staff.ustc.edu.cn/~bjhua/courses/compiler/2014/labs/lab2/index.html
+[^gre]: https://westes.github.io/flex/manual/Matching.html
+[^\d]: https://stackoverflow.com/questions/22326399/flex-seems-do-not-support-a-regex-lookahead-assertion-the-fast-lex-analyzer
