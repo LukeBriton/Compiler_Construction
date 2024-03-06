@@ -57,6 +57,11 @@ Flex 和 Bison 是 Linux 下生成词法分析器和语法分析器的工具，�
 2. 解压后即可在解压路径通过命令行执行 win_flex 或 win_bison。
 3. 为方便在别处的使用，建议于系统环境变量的 Path 中添加解压后的路径。
 
+### [LLVM](https://github.com/llvm/llvm-project)
+
+
+
+
 ## Scanner(Lexical Analysis, 词法分析)[^lex]
 
 ### Flex Matching is Greedy[^gre]
@@ -148,6 +153,92 @@ We also use a very powerful flex feature called *start states* that let us contr
 ## Parser(Syntactic Analysis, 句法分析)[^par]
 
 ## Elaborator(Semantic Analysis, 语义分析)[^ela]
+
+### Clang 
+
+After that you can use clang to compile C to mips assembly by doing something like:
+
+```Bash
+clang -target mipsel-linux-gnu foo.c -S -o -
+```
+
+which will compile the file "foo.c" to 32-bit mips assembly for the linux operating system and output it to the console.
+
+https://stackoverflow.com/questions/41988604/c-code-to-mips-assembly-using-llvm
+
+```Bash
+main.c:1:9: fatal error: 'stdio.h' file not found
+    1 | #include<stdio.h>
+      |         ^~~~~~~~~
+1 error generated.
+```
+
+https://stackoverflow.com/questions/48369566/clang-stdio-h-file-not-found
+
+https://stackoverflow.com/questions/28758917/clang-clang-doesnt-find-c-c-headers-in-windows
+
+**Clang doesn’t provide a stdio.h, it should come from your C standard library implementation, whatever that is**
+
+https://discourse.llvm.org/t/fatal-error-stdio-h-file-not-found/65271/6
+
+电脑上有 MinGW 有 GCC 可用，试着添到系统路径里。
+
+```Bash
+C:\Users\dell\Documents\GitHub\Compiler_Construction\Lab1-1st-Gen-Compiler\src>echo | gcc -E -Wp,-v -
+ignoring duplicate directory "C:/Program Files/TDM-GCC-64/lib/gcc/../../lib/gcc/x86_64-w64-mingw32/10.3.0/include"
+ignoring duplicate directory "C:/Program Files/TDM-GCC-64/lib/gcc/../../lib/gcc/x86_64-w64-mingw32/10.3.0/../../../../include"
+ignoring duplicate directory "C:/Program Files/TDM-GCC-64/lib/gcc/../../lib/gcc/x86_64-w64-mingw32/10.3.0/include-fixed"
+ignoring duplicate directory "C:/Program Files/TDM-GCC-64/lib/gcc/../../lib/gcc/x86_64-w64-mingw32/10.3.0/../../../../x86_64-w64-mingw32/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ C:/Program Files/TDM-GCC-64/bin/../lib/gcc/x86_64-w64-mingw32/10.3.0/include
+ C:/Program Files/TDM-GCC-64/bin/../lib/gcc/x86_64-w64-mingw32/10.3.0/../../../../include
+ C:/Program Files/TDM-GCC-64/bin/../lib/gcc/x86_64-w64-mingw32/10.3.0/include-fixed
+ C:/Program Files/TDM-GCC-64/bin/../lib/gcc/x86_64-w64-mingw32/10.3.0/../../../../x86_64-w64-mingw32/include
+End of search list.
+# 1 "<stdin>"
+# 1 "<built-in>"
+# 1 "<command-line>"
+# 1 "<stdin>"
+ECHO is on.
+```
+
+https://stackoverflow.com/questions/4980819/what-are-the-gcc-default-include-directories
+
+https://stackoverflow.com/questions/17939930/finding-out-what-the-gcc-include-path-is
+
+添加到了 Path 里，未果。
+
+尝试别的，添加到 CPATH 里。
+
+至于你提到的直接在 Windows 的 `Path` 环境变量中添加路径，`Path` 环境变量是用来指定可执行文件的搜索路径，而不是编译器查找头文件的路径。添加路径到 `Path` 可以让系统知道从哪里找到可执行程序，但对于编译器寻找头文件则没有帮助。因此，如果你的目的是让编译器能够找到特定的头文件，你应该使用 `CPATH`（对于头文件的搜索）而不是 `Path` 环境变量。 **⚠️ ChatGPT 4 生成（待考）**
+
+https://stackoverflow.com/questions/63782683/how-to-add-include-paths-to-clang-globally
+
+https://clang.llvm.org/docs/CommandGuide/clang.html#envvar-C_INCLUDE_PATH,OBJC_INCLUDE_PATH,CPLUS_INCLUDE_PATH,OBJCPLUS_INCLUDE_PATH
+
+https://superuser.com/questions/1717689/how-can-i-properly-configure-the-g-include-path-with-mingw64
+
+http://gcc.gnu.org/onlinedocs/gcc/Environment-Variables.html
+
+成功收获更多 errors & warnings
+
+```Bash
+C:\Program Files\TDM-GCC-64\x86_64-w64-mingw32\include\_mingw.h:272:2: error: Only Win32 target is supported!
+  272 | #error Only Win32 target is supported!
+      |  ^
+In file included from main.c:1:
+太多了，略
+41 warnings and 6 errors generated.
+```
+
+### LLVM IR -> C
+
+https://discuss.tvm.apache.org/t/possible-to-convert-a-llvm-ir-back-to-c-code/6625/5
+
+Julia，别来无恙。
+
+https://github.com/JuliaHubOSS/llvm-cbe
 
 ## 备忘
 
