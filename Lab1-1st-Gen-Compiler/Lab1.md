@@ -137,7 +137,67 @@ This way I can do the equivalent of \B or \b at the beginning or end of any patt
 
 I wanted to set up the states without consuming any characters. The trick is using REJECT rather than yymore(), which I guess I didn't fully understand.
 
-But please note that Flex patterns do not capture groups like regular expressions, so the characters matched by `[^[:alpha:]]` or `^` and `$` (for start and end of line) are not "consumed" in a way that prevents them from being matched by subsequent rules. **⚠️ ChatGPT 4 生成（待考）**
+> But please note that Flex patterns do not capture groups like regular expressions, so the characters matched by `[^[:alpha:]]` or `^` and `$` (for start and end of line) are not "consumed" in a way that prevents them from being matched by subsequent rules. **⚠️ ChatGPT 4 生成（待考）**
+
+但是，会有这样的结果：
+
+`(^|\ )\[\[:alpha:]]\(\ |$)`
+
+![🤔](./img/Bad_matching.png)
+
+Silly of me!!!
+
+我们要做的是分开匹配不同的东西，假如我把空格都给匹配了，就不用担心。。。了吗？（想复杂了）
+
+### 零宽断言
+
+> 此外，由于Flex处理的是字符流，而不是基于预先定义的正则表达式引擎，所以一些特定的正则表达式功能（如零宽断言）在Flex中可能难以直接实现。因此，设计Flex规则时通常需要采用更为直接的字符匹配和状态管理方式。
+> 实际上，正确实现上述需求的Flex代码可能会更加复杂，涉及使用开始(`^`)和结束(`$`)匹配符号的条件，以及可能需要通过在动作代码中进一步处理匹配到的文本。在上述示例中，我简化了模式以便于说明，但在实践中，可能需要结合使用状态（start conditions）和更精细的模式匹配逻辑来准确捕获这些场景。
+> 在Flex中，你无法直接创建一个规则，既检查前后的字符又不将这些字符作为匹配的一部分（即实现类似正则表达式的零宽断言）。但是，你可以通过编写规则和相应的动作代码来间接实现这个目的。 **⚠️ ChatGPT 4 生成（待考）**
+
+一些个中文的相关讲解。
+
+https://www.clarkok.com/blog/2015/04/06/Flex-匹配块级注释的正则表达式/
+
+https://www.cnblogs.com/qqfontofweb/p/16597769.html
+
+https://blog.csdn.net/w47_csdn/article/details/83507195
+
+https://blog.51cto.com/u_15069442/3654241
+
+http://www.blogjava.net/shisanfeng/articles/191396.html
+
+You can probably achieve what you want with [start conditions](http://westes.github.io/flex/manual/Start-Conditions.html), at the cost of a more complicated scanner. Start conditions allow you to conditionally enable rules based on what has matched previously.
+
+https://stackoverflow.com/questions/5615080/how-can-i-use-lookbehind-assertions-in-lex[](https://stackoverflow.com/posts/4756995/timeline)
+
+You don't match C style comments with a simple regular expression in Flex; they require a more complex matching method based on start states. The [Flex FAQ](http://westes.github.io/flex/manual/How-can-I-match-C_002dstyle-comments_003f.html) says how (well, they do for the `/*...*/` form; handling the other form in just the `<INITIAL>` state should be simple).
+
+https://stackoverflow.com/questions/4755956/unix-flex-regex-for-multi-line-comments
+
+> 零宽断言的英文是 "zero-width assertion"。在正则表达式中，零宽断言允许我们对字符串中的字符进行位置上的断言，而不消耗任何字符（即不移动匹配指针）。这意味着零宽断言用于检查某个模式是否存在，而不会将该模式作为匹配结果的一部分。常见的零宽断言包括：
+> * 零宽正向先行断言 (Positive Lookahead): `(?=pattern)`
+> * 零宽负向先行断言 (Negative Lookahead): `(?!pattern)`
+> * 零宽正向后发断言 (Positive Lookbehind): `(?<=pattern)`
+> * 零宽负向后发断言 (Negative Lookbehind): `(?<!pattern)`
+> Flex不支持零宽断言主要是因为Flex的设计初衷和实现方式。Flex是一个用于生成词法分析器的工具，其设计重点在于高效地从左到右扫描输入文本，逐个字符地匹配模式，并执行相应的动作代码。Flex的匹配机制基于最长匹配原则，即在给定位置上，它会尝试匹配最长的模式。
+> 零宽断言是正则表达式中的一个高级特性，允许进行复杂的模式匹配，而不改变正在扫描的文本的当前位置。这种特性在某些正则表达式引擎中得到支持，特别是那些更侧重于字符串处理和模式搜索的引擎。然而，Flex作为一个词法分析器生成器，其目标是高效地执行简单的模式匹配并将输入文本转换为标记（token），而不是提供复杂的正则表达式处理能力。
+> 因此，Flex的正则表达式支持相对简单，主要聚焦于满足词法分析过程中的需要，包括字符匹配、模式组合以及简单的条件分支，而不是提供完整的正则表达式引擎功能。这意味着一些正则表达式的高级特性，如零宽断言，不在Flex直接支持的范围内。 **⚠️ ChatGPT 4 生成（待考）**
+
+> Flex在处理输入时遵循最长匹配原则，如果有多个规则都能匹配当前的输入，Flex会选择匹配最长字符串的规则。在上面的规则中，`int`作为一个完整的单词将优先匹配其对应的规则并返回`INT`，而像`integer`这样的字符串将被识别为`IDENTIFIER`。
+> 通过这种方式，即使Flex本身不支持正则表达式中的零宽断言，你也能通过精心设计匹配规则来区分关键字和其他标识符。这个逻辑完全在Flex的词法分析阶段处理，而不需要借助Bison的语法分析功能。 **⚠️ ChatGPT 4 生成（待考）**
+```C
+"int"             { return INT; }
+[a-zA-Z_][a-zA-Z0-9_]*   { return IDENTIFIER; }
+```
+
+😭😭😭完全想复杂了，既用不到零宽断言，也用不到 Start Conditions。 
+
+> **Why do you assume you’re the smartest in the room? Soon that attitude may be your doom!**
+
+### 引号"..."
+
+Anything within the quotation marks is treated literally. Metacharacters other than C escape sequences lose their meaning. As a matter of style, it’s good practice to quote any punctuation characters intended to be matched literally.[^quo]
 
 ### [Start Conditions](https://westes.github.io/flex/manual/Start-Conditions.html#Start-Conditions)
 
@@ -148,7 +208,6 @@ We also use a very powerful flex feature called *start states* that let us contr
 ### [Token string and length](https://www.ibm.com/docs/en/zos/3.1.0?topic=translations-token-string-length)
 
 ### Definitions (Substitutions)[^sub]
-
 
 ## Parser(Syntactic Analysis, 句法分析)[^par]
 
@@ -211,7 +270,7 @@ https://stackoverflow.com/questions/17939930/finding-out-what-the-gcc-include-pa
 
 尝试别的，添加到 CPATH 里。
 
-至于你提到的直接在 Windows 的 `Path` 环境变量中添加路径，`Path` 环境变量是用来指定可执行文件的搜索路径，而不是编译器查找头文件的路径。添加路径到 `Path` 可以让系统知道从哪里找到可执行程序，但对于编译器寻找头文件则没有帮助。因此，如果你的目的是让编译器能够找到特定的头文件，你应该使用 `CPATH`（对于头文件的搜索）而不是 `Path` 环境变量。 **⚠️ ChatGPT 4 生成（待考）**
+> 至于你提到的直接在 Windows 的 `Path` 环境变量中添加路径，`Path` 环境变量是用来指定可执行文件的搜索路径，而不是编译器查找头文件的路径。添加路径到 `Path` 可以让系统知道从哪里找到可执行程序，但对于编译器寻找头文件则没有帮助。因此，如果你的目的是让编译器能够找到特定的头文件，你应该使用 `CPATH`（对于头文件的搜索）而不是 `Path` 环境变量。 **⚠️ ChatGPT 4 生成（待考）**
 
 https://stackoverflow.com/questions/63782683/how-to-add-include-paths-to-clang-globally
 
@@ -289,6 +348,7 @@ https://github.com/JuliaHubOSS/llvm-cbe
 [^mat]: [Flex and Bison Tutorial](https://www.capsl.udel.edu/courses/cpeg421/2012/slides/Tutorial-Flex_Bison.pdf) P17
 [^\d]: https://stackoverflow.com/questions/22326399/flex-seems-do-not-support-a-regex-lookahead-assertion-the-fast-lex-analyzer
 [^\b]: https://stackoverflow.com/questions/406985/implement-word-boundary-states-in-flex-lex-parser-generator
+[^quo]: [flex & bison](https://web.iitd.ac.in/~sumeet/flex__bison.pdf) P20
 [^sta]: [flex & bison](https://web.iitd.ac.in/~sumeet/flex__bison.pdf) P28 P136
 [^sub]: [flex & bison](https://web.iitd.ac.in/~sumeet/flex__bison.pdf) P122
 [^par]: 颇多用 syntax 修饰的，还有叫 Grammar Analysis 的, 讲道理 grammar 才是该译作“语法/文法”的。

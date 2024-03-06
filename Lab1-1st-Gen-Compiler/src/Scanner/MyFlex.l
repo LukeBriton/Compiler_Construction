@@ -19,17 +19,35 @@ int words = 0;
     /* 否则：MyFlex.l:23: unrecognized rule */
     /* Match 'int' surrounded by spaces or at the beginning/end of a line. */
     /* 输入文件中可能存在多个连续的空格 */
-(^|\ )(int)(\ |$) { printf("Keyword 'int' found\n"); }
-
+    /* printf 双引号需要转义 */
+"int" { printf("Keyword \"int\"\n"); }
+"return" { printf("Keyword \"return\"\n"); }
+    /* 标识符：单个英文字母，如 a、 b 等 */
+    /* 以后考虑增加处理 字母、数字、下划线 */
+    /* 以及例如 2a 非法 a5 合法此类 */
+    /* Starting Condition? */
 [[:alpha:]]     {
                     chars += yyleng;
-                    return IDENTIFIER;
+                    printf("Identifier\n");
+                    //return IDENTIFIER;
                 }
-
+    /* 常量：十进制整型，如 1、 223、 10 等 */
+    /* 此处疑似实际指的是字面量，且局限在了整型字面量中的decimal-literal */
+    /* 以后考虑外加浮点数、非十进制数，乃至字符（串）的处理 */
+    /* a.b1() 和 1.4 */
 ([[:digit:]]{-}[0])[[:digit:]]*    {
                     chars += yyleng;
-                    return CONST;
+                    printf("Literal\n");
+                    //return LITERAL;
                 }
+    /* 操作符： =、 +、 -、 *、 / */
+"=" { printf("Operator \"=\"\n"); }
+"+" { printf("Operator \"+\"\n"); }
+"-" { printf("Operator \"-\"\n"); }
+"*" { printf("Operator \"*\"\n"); }
+"/" { printf("Operator \"/\"\n"); }
+    /* 分隔符： ; */
+";" { printf("Semicolon \";\"\n"); }
 
 .           {}
 %%
