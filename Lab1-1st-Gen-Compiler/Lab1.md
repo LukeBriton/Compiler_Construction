@@ -61,9 +61,7 @@ Flex 和 Bison 是 Linux 下生成词法分析器和语法分析器的工具，�
 
 ### Flex Matching is Greedy[^gre]
 
-最长最先匹配规则。
-
-[^mat]
+最长最先匹配规则。[^mat]
 
 When the generated scanner is run, it analyzes its input looking for strings which match any of its patterns. If it finds more than one match, it takes the one matching the most text (for trailing context rules, this includes the length of the trailing part, even though it will then be returned to the input). If it finds two or more matches of the same length, the rule listed first in the `flex` input file is chosen.
 
@@ -106,7 +104,9 @@ These expressions all designate a set of characters equivalent to the correspond
 
 否则你会得到： `[:digit:]` := `[: 或 d 或 i 或 g 或 t]`
 
-### `\b`
+### `\b`[^\b]
+
+悬乎
 
 ```Flex
 %{
@@ -128,14 +128,21 @@ NW      [^A-Za-z']
 %%
 ```
 
+This way I can do the equivalent of \B or \b at the beginning or end of any pattern. You can match at the end by doing `a/{WC}` or `a/{NW}`.
 
-https://stackoverflow.com/questions/406985/implement-word-boundary-states-in-flex-lex-parser-generator
+I wanted to set up the states without consuming any characters. The trick is using REJECT rather than yymore(), which I guess I didn't fully understand.
 
-[Start Conditions](https://westes.github.io/flex/manual/Start-Conditions.html#Start-Conditions)
+But please note that Flex patterns do not capture groups like regular expressions, so the characters matched by `[^[:alpha:]]` or `^` and `$` (for start and end of line) are not "consumed" in a way that prevents them from being matched by subsequent rules. **⚠️ ChatGPT 4 生成（待考）**
 
+### [Start Conditions](https://westes.github.io/flex/manual/Start-Conditions.html#Start-Conditions)
 
+We also use a very powerful flex feature called *start states* that let us control which patterns can be matched when. [^sta]
 
 ### [Expressions](https://en.cppreference.com/w/c/language/expressions)
+
+### [Token string and length](https://www.ibm.com/docs/en/zos/3.1.0?topic=translations-token-string-length)
+
+### Definitions (Substitutions)[^sub]
 
 
 ## Parser(Syntactic Analysis, 句法分析)[^par]
@@ -188,8 +195,11 @@ https://stackoverflow.com/questions/406985/implement-word-boundary-states-in-fle
 [^11]: https://www.gnu.org/software/bison/manual/html_node/Introduction.html
 [^12]: https://ustc-compiler-principles.github.io/2023/lab1/Bison/
 [^lex]: **Scanner**, **Tokenizer**, **Lexer**: https://cboard.cprogramming.com/a-brief-history-of-cprogramming-com/110518-scanner-lexical-analyzer-tokenizer.html
-[^mat]: [Flex and Bison Tutorial](https://www.cse.scu.edu/~m1wang/compiler/TutorialFlexBison.pdf) P17
+[^mat]: [Flex and Bison Tutorial](https://www.capsl.udel.edu/courses/cpeg421/2012/slides/Tutorial-Flex_Bison.pdf) P17
+[^\d]: https://stackoverflow.com/questions/22326399/flex-seems-do-not-support-a-regex-lookahead-assertion-the-fast-lex-analyzer
+[^\b]: https://stackoverflow.com/questions/406985/implement-word-boundary-states-in-flex-lex-parser-generator
+[^sta]: [flex & bison](https://web.iitd.ac.in/~sumeet/flex__bison.pdf) P28 P136
+[^sub]: [flex & bison](https://web.iitd.ac.in/~sumeet/flex__bison.pdf) P122
 [^par]: 颇多用 syntax 修饰的，还有叫 Grammar Analysis 的, 讲道理 grammar 才是该译作“语法/文法”的。
 [^ela]: http://staff.ustc.edu.cn/~bjhua/courses/compiler/2014/labs/lab2/index.html
 [^gre]: https://westes.github.io/flex/manual/Matching.html
-[^\d]: https://stackoverflow.com/questions/22326399/flex-seems-do-not-support-a-regex-lookahead-assertion-the-fast-lex-analyzer

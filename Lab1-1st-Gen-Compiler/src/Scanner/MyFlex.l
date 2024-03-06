@@ -6,6 +6,7 @@
     包括该条注释内容 */
 #include <string.h>
 int chars = 0;
+int words = 0;
 %}
 
 /* This tells flex to read only one input file */
@@ -15,17 +16,19 @@ int chars = 0;
 /* 每条规则由正则表达式和动作组成 */
 %%
     /* 在规则部分，不要顶格写注释 */
-([[:digit:]]{-}[0])[[:digit:]]*    {
-                    yylval.dval = atof(yytext);
-                    chars += strlen(yytext);
-                    return CONST;
-                }
+    /* 否则：MyFlex.l:23: unrecognized rule */
+    /* Match 'int' surrounded by spaces or at the beginning/end of a line. */
+    /* 输入文件中可能存在多个连续的空格 */
+(^|\ )(int)(\ |$) { printf("Keyword 'int' found\n"); }
 
 [[:alpha:]]     {
-                    struct symtab *sp = symlook(yytext);
-                    yylval.symp = sp;
-                    chars += strlen(yytext);
+                    chars += yyleng;
                     return IDENTIFIER;
+                }
+
+([[:digit:]]{-}[0])[[:digit:]]*    {
+                    chars += yyleng;
+                    return CONST;
                 }
 
 .           {}
