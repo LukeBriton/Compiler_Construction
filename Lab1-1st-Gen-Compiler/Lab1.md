@@ -199,6 +199,8 @@ https://stackoverflow.com/questions/4755956/unix-flex-regex-for-multi-line-comme
 
 Anything within the quotation marks is treated literally. Metacharacters other than C escape sequences lose their meaning. As a matter of style, it’s good practice to quote any punctuation characters intended to be matched literally.[^quo]
 
+### [.cmd](https://stackoverflow.com/questions/148968/windows-batch-files-bat-vs-cmd)
+
 ### [Start Conditions](https://westes.github.io/flex/manual/Start-Conditions.html#Start-Conditions)
 
 We also use a very powerful flex feature called *start states* that let us control which patterns can be matched when. [^sta]
