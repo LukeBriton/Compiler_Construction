@@ -13,8 +13,8 @@
 %start top
 
 %union {
-    char   op;
-    double num;
+    char op;
+    int num;
 }
 
 %%
@@ -72,7 +72,7 @@ void yyerror(const char *s)
     fprintf(stderr, "%s\n", s);
 }
 
-int main()
+int main(int argc, char *argv[])
 {
     yyparse();
     return 0;

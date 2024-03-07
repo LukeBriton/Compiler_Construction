@@ -57,10 +57,9 @@ Flex 和 Bison 是 Linux 下生成词法分析器和语法分析器的工具，�
 2. 解压后即可在解压路径通过命令行执行 win_flex 或 win_bison。
 3. 为方便在别处的使用，建议于系统环境变量的 Path 中添加解压后的路径。
 
+![Flex_Bison.png](./img/Flex_Bison.png)
+
 ### [LLVM](https://github.com/llvm/llvm-project)
-
-
-
 
 ## Scanner(Lexical Analysis, 词法分析)[^lex]
 
@@ -207,11 +206,47 @@ We also use a very powerful flex feature called *start states* that let us contr
 
 ### [Expressions](https://en.cppreference.com/w/c/language/expressions)
 
+### Constant & Literal
+
+https://en.cppreference.com/w/c/language/integer_constant
+
+https://en.cppreference.com/w/cpp/language/integer_literal
+
+I suspect that someone decided there was a subtle difference and changed the designation.
+
+https://www.quora.com/Why-in-C-they-are-called-character-constants-but-in-C-they-are-called-character-literals-Whats-the-difference-between-literal-and-constant
+
 ### [Token string and length](https://www.ibm.com/docs/en/zos/3.1.0?topic=translations-token-string-length)
 
 ### Definitions (Substitutions)[^sub]
 
+### `%option`
+
+`nodefault`
+
+Flex lets you say `%option nodefault` at the top of the scanner to tell it not to add a default rule and rather to report an error if the input rules don’t cover all possible input. I recommend that scanners always use nodefault and include their own default rule if one is needed. P27-P28
+
+`yylineno`
+
+The `%yylineno` option tells flex to define an integer variable called `yylineno` and to maintain the current line number in it. What that means is that every time the scanner reads a newline character, it increments `yylineno`, and if the scanner backs up over a newline (using some features we’ll get to later), it decrements it. It’s still up to you to initialize `yylineno` to 1 at the beginning of each file and to save and restore it if you’re handling include files. Even with those limitations, it’s still easier than doing line numbers by hand. (In this example, there’s only a single pattern that matches `\n`, which wouldn’t be hard to get right, but it’s quite common to have several patterns that match, causing hard-to-track bugs when some but not all of them update the line number.) P32
+
+### Concordance
+
+语境共现/定位索引
+
+并列索引（港）
+
+用語索引（韩）
+
+https://www.corpus4u.org/threads/1605/
+http://www.elephant.org.il/indexing/index-vs-concordance
+
+###
+
+
 ## Parser(Syntactic Analysis, 句法分析)[^par]
+
+
 
 ## Elaborator(Semantic Analysis, 语义分析)[^ela]
 
