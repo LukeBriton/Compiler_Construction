@@ -17,6 +17,7 @@ of each file and to save and restore it if you’re handling include files. */
 /* 以下是声明部分，`%{` 和 `%}` 之间的内容会被原样复制到生成的 C 文件头部
     包括该条注释内容 */
 #include <string.h>
+#include "MyBison.tab.h"
 int chars = 0;
 int words = 0;
 int lines = 0;
@@ -66,6 +67,7 @@ int lines = 0;
                     //chars += yyleng;
                     //printf("Literal\n");
                     //叫做 NUMBER 是为了方便之后扩展 Parser 中句法。
+                    yylval.num = atof(yytext);
                     return NUMBER;
                 }
     /* 操作符： =、 +、 -、 *、 / */
@@ -73,8 +75,11 @@ int lines = 0;
         //basic(C)/simple(C++) assignment
         //==, +=, -=...
         //printf("Operator \"=\"\n");
+        yylval.op = yytext[0];
         return ASSIGN;
     }
+\( { return LPAREN; }
+\) { return RPAREN; }
 "+"|"-" { yylval.op = yytext[0]; return ADDOP; }
 "*"|"/" { yylval.op = yytext[0]; return MULOP; }
 
@@ -108,11 +113,12 @@ int lines = 0;
         //printf("Semicolon \";\"\n");
         return SEMICOLON;
     }
-
+\r\n|\n|\r { return CRLF; }
 .           {}
 %%
 
 /* 以下为 C 代码部分 */
+/*
 int main(int argc, char *argv[])
 {
     if(argc > 1)
@@ -128,3 +134,4 @@ int main(int argc, char *argv[])
     printf("look, I find %d words of %d chars\n", words, chars);
     return 0;
 }
+*/

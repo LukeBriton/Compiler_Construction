@@ -5,16 +5,18 @@
     void yyerror(const char *s);
 %}
 
-%token RET
+%token IDENTIFIER
+%token INT RETURN
+%token CRLF
 %token <num> NUMBER
-%token <op> ADDOP MULOP LPAREN RPAREN
+%token <op> ADDOP MULOP LPAREN RPAREN ASSIGN SEMICOLON
 %type <num> top line expr term factor
 
 %start top
 
 %union {
     char op;
-    int num;
+    long long int num;
 }
 
 %%
@@ -24,9 +26,9 @@ top
 | {}
 
 line
-: expr RET
+: expr CRLF
 {
-    printf(" = %f\n", $1);
+    printf(" = %d\n", $1); //乐，这个忘了改了差点。
 }
 
 expr
@@ -51,7 +53,7 @@ term
 {
     switch ($2) {
     case '*': $$ = $1 * $3; break;
-    case '/': $$ = $1 / $3; break; // 这里会出什么问题？
+    case '/': $$ = $1 / $3; break; // 除 0 会报 syntax error
     }
 }
 

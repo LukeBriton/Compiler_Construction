@@ -54,12 +54,17 @@ extern int yydebug;
     YYEOF = 0,                     /* "end of file"  */
     YYerror = 256,                 /* error  */
     YYUNDEF = 257,                 /* "invalid token"  */
-    RET = 258,                     /* RET  */
-    NUMBER = 259,                  /* NUMBER  */
-    ADDOP = 260,                   /* ADDOP  */
-    MULOP = 261,                   /* MULOP  */
-    LPAREN = 262,                  /* LPAREN  */
-    RPAREN = 263                   /* RPAREN  */
+    IDENTIFIER = 258,              /* IDENTIFIER  */
+    INT = 259,                     /* INT  */
+    RETURN = 260,                  /* RETURN  */
+    CRLF = 261,                    /* CRLF  */
+    NUMBER = 262,                  /* NUMBER  */
+    ADDOP = 263,                   /* ADDOP  */
+    MULOP = 264,                   /* MULOP  */
+    LPAREN = 265,                  /* LPAREN  */
+    RPAREN = 266,                  /* RPAREN  */
+    ASSIGN = 267,                  /* ASSIGN  */
+    SEMICOLON = 268                /* SEMICOLON  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -68,12 +73,12 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 15 "MyBison.y"
+#line 17 "MyBison.y"
 
-    char   op;
-    double num;
+    char op;
+    int num;
 
-#line 77 "MyBison.tab.h"
+#line 82 "MyBison.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

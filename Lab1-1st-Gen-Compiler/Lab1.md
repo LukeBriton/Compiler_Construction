@@ -246,7 +246,22 @@ http://www.elephant.org.il/indexing/index-vs-concordance
 
 ## Parser(Syntactic Analysis, 句法分析)[^par]
 
+### [Symbols](https://www.gnu.org/software/bison/manual/html_node/Symbols.html)
 
+Bison automatically does the parsing for you, remembering what rules have been matched, so the action code maintains the values associated with each symbol. Bison parsers also perform side effects such as creating data structures for later use or, as in this case, printing out results. The symbol on the left side of the first rule is the *start symbol*, the one that the entire input has to match. There can be, and usually are, other\
+rules with the same start symbol on the left.
+
+Each symbol in a bison rule has a value; the value of the target symbol (the one to the left of the colon) is called `$$` in the action code, and the values on the right are numbered`$1`, `$2`, and so forth, up to the number of symbols in the rule. The values of tokens are whatever was in `yylval` when the scanner returned the token; the values of other symbols are set in rules in the parser. In this parser, the values of the factor, term, and `exp` symbols are the value of the expression they represent.
+
+### 符号链接
+
+From [linux symlink manual](https://man7.org/linux/man-pages/man7/symlink.7.html) (assuming you are in Linux):
+
+> A symbolic link is a special type of file whose contents are a string that is the pathname of another file, the file to which the link refers. (The contents of a symbolic link can be read using readlink(2).)
+
+So a symbolic link is one more file, just as a `README.md` or a `Makefile`. Git just stores the contents of the link (i.e. the aforementioned path of the file system object that it links to) in a 'blob' just like it would for any other file. It then stores the name, mode and type (including the fact that it is a symlink) in the tree object that represents its containing directory.
+
+https://stackoverflow.com/questions/954560/how-does-git-handle-symbolic-links
 
 ## Elaborator(Semantic Analysis, 语义分析)[^ela]
 
