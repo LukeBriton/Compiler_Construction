@@ -1,4 +1,8 @@
-# Lab1-1st-Gen-Compiler 初代编译器[^1]
+# Lab1-1st-Gen-Compiler 初代编译器[^0]
+
+![dragon.lowres.jpg](./img/dragon.lowres.jpg "dragon.lowres.jpg")[^1]🐉🐉😘😋
+
+![Dragon_Book.png](./img/Dragon_Book.png "Dragon_Book.png")😭😿
 
 ## 前言 🚧
 
@@ -384,7 +388,8 @@ https://github.com/JuliaHubOSS/llvm-cbe
 
 [正则表达式在线测试](https://www.jyshare.com/front-end/854/)
 
-[^1]: ~~日式转写：Shodai Konpa~~
+[^0]: ~~日式转写：Shodai Konpa~~
+[^1]: https://www.cs.mcgill.ca/~cs520/2020/images/dragon.lowres.jpg
 [^2]: Engineering a Compiler 3rd ed. Page xxii
 [^3]: 同上 Page 4
 [^4]: 同上 Page 2
