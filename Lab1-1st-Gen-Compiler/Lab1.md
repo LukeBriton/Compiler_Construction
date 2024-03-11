@@ -17,7 +17,12 @@
 ![Internal Structure](./img/Internal_structure.png)[^5]
 
 ![Main Steps](./img/Main_steps.png "Main_steps.png")[^6]
+
 ![Tr0y_Frontend.png](./img/Tr0y_Frontend.png)[^7]
+
+![image-20240310150850583](C:\Users\dell\Documents\GitHub\Compiler_Construction\Lab1-1st-Gen-Compiler\img\Phrases.png)[^8]
+
+![image-20240310151345149](C:\Users\dell\Documents\GitHub\Compiler_Construction\Lab1-1st-Gen-Compiler\img\Crafting_a_Compiler.png)[^9]
 
 ## 安排
 
@@ -31,7 +36,7 @@ https://stackoverflow.com/questions/623503/what-is-the-difference-between-flex-l
 
 **手册：https://westes.github.io/flex/manual/**
 
-`flex` is a tool for generating *scanners*: programs which recognized lexical patterns in text. `flex` reads the given input files, or its standard input if no file names are given, for a description of a scanner to generate. The description is in the form of pairs of regular expressions and C code, called *rules*. `flex` generates as output a C source file, `` `lex.yy.c' ``, which defines a routine `` `yylex()' ``. This file is compiled and linked with the `` `-lfl' `` library to produce an executable. When the executable is run, it analyzes its input for occurrences of the regular expressions. Whenever it finds one, it executes the corresponding C code. [^8]
+`flex` is a tool for generating *scanners*: programs which recognized lexical patterns in text. `flex` reads the given input files, or its standard input if no file names are given, for a description of a scanner to generate. The description is in the form of pairs of regular expressions and C code, called *rules*. `flex` generates as output a C source file, `` `lex.yy.c' ``, which defines a routine `` `yylex()' ``. This file is compiled and linked with the `` `-lfl' `` library to produce an executable. When the executable is run, it analyzes its input for occurrences of the regular expressions. Whenever it finds one, it executes the corresponding C code. [^10]
 
 `flex`是一个用于生成*扫描器*的工具：这些程序能够识别文本中的词法模式。`flex`读取给定的输入文件，或者如果没有给定文件名，则读取其标准输入，以获取要生成的扫描器的描述。描述的形式是正则表达式和C代码的配对，称为*规则*。`flex`生成的输出是一个C源文件，`lex.yy.c`，该文件定义了一个`yylex()`函数。这个文件被编译和链接到`-lfl`库以产生一个可执行文件。当该可执行文件运行时，它分析其输入以查找正则表达式的出现。每当找到一个，就执行相应的C代码。
 
@@ -41,19 +46,19 @@ https://stackoverflow.com/questions/623503/what-is-the-difference-between-flex-l
 
 2. 生成的 `lex.yy.c` 文件可以通过 C 编译为可执行文件。
 
-3. 最终，可执行文件将输入流解析成一系列的标记/词例[^9]（tokens）。[^10]
+3. 最终，可执行文件将输入流解析成一系列的标记/词例[^11]（tokens）。[^12]
 
 ### [GNU Bison (parser generator)](https://www.gnu.org/software/bison/)
 
 **手册：https://www.gnu.org/software/bison/manual/**
 
-*Bison* is a general-purpose parser generator that converts an annotated context-free grammar into a deterministic LR or generalized LR (GLR) parser employing LALR(1), IELR(1) or canonical LR(1) parser tables. Once you are proficient with Bison, you can use it to develop a wide range of language parsers, from those used in simple desk calculators to complex programming languages.[^11]
+*Bison* is a general-purpose parser generator that converts an annotated context-free grammar into a deterministic LR or generalized LR (GLR) parser employing LALR(1), IELR(1) or canonical LR(1) parser tables. Once you are proficient with Bison, you can use it to develop a wide range of language parsers, from those used in simple desk calculators to complex programming languages.[^13]
 
 *Bison* 是一个通用的解析器生成器，它将带注释的上下文无关语法转换成使用LALR(1)、IELR(1)或规范LR(1)解析器表的确定性LR或广义LR(GLR)解析器。一旦你熟练掌握了Bison，你就可以使用它来开发各种范围的语言解析器，从用于简单桌面计算器的解析器到复杂的编程语言解析器。
 
 ![Bison](./img/Bison.png)
 
-Flex 和 Bison 是 Linux 下生成词法分析器和语法分析器的工具，用于处理结构化输入，协同工作解析复杂文件。Flex 将文本文件拆分为有意义的词法记号（token），而 Bison 根据语法规则生成抽象语法树（AST），Bison 在协同工作中担任主导角色，而 Flex 辅助生成 yylex 函数。[^12]
+Flex 和 Bison 是 Linux 下生成词法分析器和语法分析器的工具，用于处理结构化输入，协同工作解析复杂文件。Flex 将文本文件拆分为有意义的词法记号（token），而 Bison 根据语法规则生成抽象语法树（AST），Bison 在协同工作中担任主导角色，而 Flex 辅助生成 yylex 函数。[^14]
 
 ### [WinFlexBison - Flex and Bison for Microsoft Windows](https://github.com/lexxmark/winflexbison)
 
@@ -382,7 +387,13 @@ https://github.com/JuliaHubOSS/llvm-cbe
 
 [妮可 2014](http://staff.ustc.edu.cn/~bjhua/courses/compiler/2014/)
 
+### 救世啊
+
+[A Compiler Writing Journey](https://github.com/DoctorWkt/acwj)
+
 [妮可 2023](https://ustc-compiler-principles.github.io/2023/)
+
+[COMP 520 Compiler Design Winter 2020 Alexander Krolik](https://www.cs.mcgill.ca/~cs520/2020/)
 
 ## 相关链接
 
@@ -396,11 +407,13 @@ https://github.com/JuliaHubOSS/llvm-cbe
 [^5]: 同上 Page 9
 [^6]: https://github.com/DoctorWkt/acwj/blob/master/00_Introduction/Figs/parsing_steps.png
 [^7]: https://www.tr0y.wang/2021/04/04/编译原理（四）：语义分析/
-[^8]: https://ftp.gnu.org/old-gnu/Manuals/flex-2.5.4/html_node/flex_4.html
-[^9]: 术语的中文翻译问题，参见：https://www.zhihu.com/question/39279003
-[^10]: https://ustc-compiler-principles.github.io/2023/lab1/Flex/
-[^11]: https://www.gnu.org/software/bison/manual/html_node/Introduction.html
-[^12]: https://ustc-compiler-principles.github.io/2023/lab1/Bison/
+[^8]: https://www.cs.mcgill.ca/~cs520/2020/slides/1-intro.pdf P26
+[^9]: 同上 P27
+[^10]: https://ftp.gnu.org/old-gnu/Manuals/flex-2.5.4/html_node/flex_4.html
+[^11]: 术语的中文翻译问题，参见：https://www.zhihu.com/question/39279003
+[^12]: https://ustc-compiler-principles.github.io/2023/lab1/Flex/
+[^13]: https://www.gnu.org/software/bison/manual/html_node/Introduction.html
+[^14]: https://ustc-compiler-principles.github.io/2023/lab1/Bison/
 [^lex]: **Scanner**, **Tokenizer**, **Lexer**: https://cboard.cprogramming.com/a-brief-history-of-cprogramming-com/110518-scanner-lexical-analyzer-tokenizer.html
 [^mat]: [Flex and Bison Tutorial](https://www.capsl.udel.edu/courses/cpeg421/2012/slides/Tutorial-Flex_Bison.pdf) P17
 [^\d]: https://stackoverflow.com/questions/22326399/flex-seems-do-not-support-a-regex-lookahead-assertion-the-fast-lex-analyzer
