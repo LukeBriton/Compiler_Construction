@@ -16,32 +16,17 @@ struct token {
 
 // Tokens
 enum {
-  T_EOF, T_PLUS, T_MINUS, T_STAR, T_SLASH, T_INTLIT
+  T_PLUS, T_MINUS, T_STAR, T_SLASH, T_INTLIT
 };
 
-// AST node types
-enum {
-  A_ADD, A_SUBTRACT, A_MULTIPLY, A_DIVIDE, A_INTLIT
-};
-
-// Abstract Syntax Tree structure
-struct ASTnode {
-  int op;                               // "Operation" to be performed on this tree
-  struct ASTnode *left;                 // Left and right child trees
-  struct ASTnode *right;
-  int intvalue;                         // For A_INTLIT, the integer value
-};
-
-/* undefined reference to `Line', `Infile', `Putback'...
+/* undefined reference to `Line', `Infile', `Putback'
 extern int     Line;
 extern int     Putback;
 extern FILE    *Infile;
-extern_ struct token    Token;
 */
 int     Line;
 int     Putback;
 FILE    *Infile;
-struct token    Token;
 
 static int next();
 static int skip();
@@ -51,14 +36,6 @@ static int chrpos(const char*, int);
 static void scanfile();
 static void init();
 static void putback(int);
-
-struct ASTnode *mkastnode(int op, struct ASTnode *left, struct ASTnode *right, int intvalue);
-struct ASTnode *mkastleaf(int op, int intvalue);
-struct ASTnode *mkastunary(int op, struct ASTnode *left, int intvalue);
-int arithop(int tok);
-static struct ASTnode *primary(void);
-struct ASTnode *binexpr(void);
-int interpretAST(struct ASTnode *n);
 
 // Get the next character from the input file.
 static int next(void) {
@@ -171,15 +148,12 @@ static int chrpos(const char *s, int c) {
 // error: '::main' must return 'int'
 // void main(int argc, char *argv[])
 int main(int argc, char *argv[]) {
-  struct ASTnode *n;
+  
   init();
   
   Infile = fopen(argv[1], "r");
   
-  //scanfile();
-  scan(&Token);			// Get the first token from the input
-  n = binexpr();		// Parse the expression in the file
-  printf("%d\n", interpretAST(n));	// Calculate the final result
+  scanfile();
   exit(0);
   // return 0; // 还需要返回值吗
 }
@@ -213,125 +187,4 @@ static void init() {
 // Put back an unwanted character
 static void putback(int c) {
   Putback = c;
-}
-
-// Build and return a generic AST node
-struct ASTnode *mkastnode(int op, struct ASTnode *left,
-                          struct ASTnode *right, int intvalue) {
-  struct ASTnode *n;
-
-  // Malloc a new ASTnode
-  n = (struct ASTnode *) malloc(sizeof(struct ASTnode));
-  if (n == NULL) {
-    fprintf(stderr, "Unable to malloc in mkastnode()\n");
-    exit(1);
-  }
-  // Copy in the field values and return it
-  n->op = op;
-  n->left = left;
-  n->right = right;
-  n->intvalue = intvalue;
-  return (n);
-}
-
-// Make an AST leaf node
-struct ASTnode *mkastleaf(int op, int intvalue) {
-  return (mkastnode(op, NULL, NULL, intvalue));
-}
-
-// Make a unary AST node: only one child
-struct ASTnode *mkastunary(int op, struct ASTnode *left, int intvalue) {
-  return (mkastnode(op, left, NULL, intvalue));
-}
-
-// Convert a token into an AST operation.
-int arithop(int tok) {
-  switch (tok) {
-    case T_PLUS:
-      return (A_ADD);
-    case T_MINUS:
-      return (A_SUBTRACT);
-    case T_STAR:
-      return (A_MULTIPLY);
-    case T_SLASH:
-      return (A_DIVIDE);
-    default:
-      fprintf(stderr, "unknown token in arithop() on line %d\n", Line);
-      exit(1);
-  }
-}
-
-// Parse a primary factor and return an
-// AST node representing it.
-static struct ASTnode *primary(void) {
-  struct ASTnode *n;
-
-  // For an INTLIT token, make a leaf AST node for it
-  // and scan in the next token. Otherwise, a syntax error
-  // for any other token type.
-  switch (Token.token) {
-    case T_INTLIT:
-      n = mkastleaf(A_INTLIT, Token.intvalue);
-      scan(&Token);
-      return (n);
-    default:
-      fprintf(stderr, "syntax error on line %d\n", Line);
-      exit(1);
-  }
-}
-
-// Return an AST tree whose root is a binary operator
-struct ASTnode *binexpr(void) {
-  struct ASTnode *n, *left, *right;
-  int nodetype;
-
-  // Get the integer literal on the left.
-  // Fetch the next token at the same time.
-  left = primary();
-
-  // If no tokens left, return just the left node
-  if (Token.token == T_EOF)
-    return (left);
-
-  // Convert the token into a node type
-  nodetype = arithop(Token.token);
-
-  // Get the next token in
-  scan(&Token);
-
-  // Recursively get the right-hand tree
-  right = binexpr();
-
-  // Now build a tree with both sub-trees
-  n = mkastnode(nodetype, left, right, 0);
-  return (n);
-}
-
-// Given an AST, interpret the
-// operators in it and return
-// a final value.
-int interpretAST(struct ASTnode *n) {
-  int leftval, rightval;
-
-  // Get the left and right sub-tree values
-  if (n->left)
-    leftval = interpretAST(n->left);
-  if (n->right)
-    rightval = interpretAST(n->right);
-
-  switch (n->op) {
-    case A_ADD:
-      return (leftval + rightval);
-    case A_SUBTRACT:
-      return (leftval - rightval);
-    case A_MULTIPLY:
-      return (leftval * rightval);
-    case A_DIVIDE:
-      return (leftval / rightval);
-    case A_INTLIT:
-      return (n->intvalue);
-    default:
-      fprintf(stderr, "Unknown AST operator %d\n", n->op);
-      exit(1);
-  }
 }
