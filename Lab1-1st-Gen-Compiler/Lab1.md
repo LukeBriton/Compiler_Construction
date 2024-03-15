@@ -70,6 +70,53 @@ Flex 和 Bison 是 Linux 下生成词法分析器和语法分析器的工具，�
 
 ### [LLVM](https://github.com/llvm/llvm-project)
 
+## Regex
+
+> Some people, when confronted with a problem, think
+>	“I know, I'll use regular expressions.”   Now they have two problems.
+>			– [Jamie Zawinski](https://en.wikiquote.org/wiki/Jamie_Zawinski)
+
+[Regular expressions library (since C++11)](https://en.cppreference.com/w/cpp/regex)
+
+*Speech and Language Processing* Third Edition Draft of February 3, 2024
+
+### regex.h & PCRE2
+
+Regular expressions actually aren't part of ANSI C. It sounds like you might be talking about the POSIX regular expression library, which comes with most (all?) *nixes. Here's an example of using POSIX regexes in C (based on [this](http://web.archive.org/web/20160308115653/http://peope.net/old/regex.html)):
+
+[Regular expressions in C: examples?](https://stackoverflow.com/questions/1085083/regular-expressions-in-c-examples)
+
+俺的电脑： C:\Program Files\TDM-GCC-64\lib\gcc\x86_64-w64-mingw32\10.3.0\include\c++\bits
+
+[Regex.h for windows](https://stackoverflow.com/questions/8230905/regex-h-for-windows)
+
+[C: Regex library with MinGW](https://stackoverflow.com/questions/3781211/c-regex-library-with-mingw)
+
+[PCRE](https://www.pcre.org/)
+
+### [isspace](https://en.cppreference.com/w/c/string/byte/isspace) & [std::isspace](https://en.cppreference.com/w/cpp/string/byte/isspace)
+
+<ctype.h> & <cctype>
+
+```C
+int isspace( int ch );
+```
+
+Checks if the given character is either
+
+* A standard white-space character:
+
+- - Space (`0x20`, ' '),
+  - Form feed (`0x0c`, '\f'),
+  - Line feed (`0x0a`, '\n'),
+  - Carriage return (`0x0d`, '\r'),
+  - Horizontal tab (`0x09`, '\t'),
+  - Vertical tab (`0x0b`, '\v'),
+
+* Or a locale-specific white-space character.
+
+  The behavior is undefined if the value of `ch` is not representable as unsigned char and is not equal to [EOF](https://en.cppreference.com/w/c/io "c/io").
+
 ## Scanner(Lexical Analysis, 词法分析)[^lex]
 
 ### Flex Matching is Greedy[^gre]
