@@ -8,8 +8,6 @@
 #include<stdlib.h> //void exit( int exit_code );
 // https://stackoverflow.com/questions/22485822/exit-is-not-working
 
-#define TEXTLEN         512             // Length of symbols in input
-
 // Token structure
 struct token {
   int token;
@@ -18,7 +16,7 @@ struct token {
 
 // Tokens
 enum {
-  T_EOF, T_PLUS, T_MINUS, T_STAR, T_SLASH, T_INTLIT, T_SEMI, T_PRINT
+  T_EOF, T_PLUS, T_MINUS, T_STAR, T_SLASH, T_INTLIT
 };
 
 // AST node types
@@ -39,15 +37,12 @@ extern int     Line;
 extern int     Putback;
 extern FILE    *Infile;
 extern_ struct token    Token;
-extern_ char Text[TEXTLEN + 1];
 */
 int     Line;
 int     Putback;
 FILE    *Infile;
 FILE    *Outfile;
 struct token    Token;
-
-char Text[TEXTLEN + 1];         // Last identifier scanned
 
 // Operator precedence for each token
 static int OpPrec[] = { 0, 10, 10, 20, 20,    0 };
@@ -58,8 +53,6 @@ static int skip();
 int scan(struct token*);
 static int scanint(int c);
 static int chrpos(const char*, int);
-static int scanident(int c, char *buf, int lim);
-static int keyword(char *s);
 static void scanfile();
 static void init();
 static void putback(int);
@@ -88,10 +81,6 @@ int cgdiv(int r1, int r2);
 void cgprintint(int r);
 void cgpreamble();
 void cgpostamble();
-
-void statements();
-void match(int t, char *what);
-void semi();
 
 // Get the next character from the input file.
 static int next(void) {
@@ -133,7 +122,7 @@ static int skip(void) {
 // Scan and return the next token found in the input.
 // Return 1 if token valid, 0 if no tokens left.
 int scan(struct token *t) {
-  int c, tokentype;
+  int c;
 
   // Skip whitespace
   c = skip();
@@ -159,9 +148,6 @@ int scan(struct token *t) {
   case '/':
     t->token = T_SLASH;
     break;
-  case ';':
-    t->token = T_SEMI;
-    break;
   default:
 
     // If it's a digit, scan the
@@ -170,21 +156,8 @@ int scan(struct token *t) {
       t->intvalue = scanint(c);
       t->token = T_INTLIT;
       break;
-    } else if (isalpha(c) || '_' == c) {
-      // Read in a keyword or identifier
-      scanident(c, Text, TEXTLEN);
-
-      // If it's a recognised keyword, return that token
-      if (tokentype = keyword(Text)) {
-        t->token = tokentype;
-        break;
-      }
-
-      // Not a recognised keyword, so an error for now
-      printf("Unrecognised symbol %s on line %d\n", Text, Line);
-      exit(1);
     }
-    // The character isn't part of any recognised token, error
+
     printf("Unrecognised character %c on line %d\n", c, Line);
     exit(1);
   }
@@ -221,44 +194,6 @@ static int chrpos(const char *s, int c) {
   return (p ? p - s : -1);
 }
 
-// Scan an identifier from the input file and
-// store it in buf[]. Return the identifier's length
-static int scanident(int c, char *buf, int lim) {
-  int i = 0;
-
-  // Allow digits, alpha and underscores
-  while (isalpha(c) || isdigit(c) || '_' == c) {
-    // Error if we hit the identifier length limit,
-    // else append to buf[] and get next character
-    if (lim - 1 == i) {
-      printf("identifier too long on line %d\n", Line);
-      exit(1);
-    } else if (i < lim - 1) {
-      buf[i++] = c;
-    }
-    c = next();
-  }
-  // We hit a non-valid character, put it back.
-  // NUL-terminate the buf[] and return the length
-  putback(c);
-  buf[i] = '\0';
-  return (i);
-}
-
-// Given a word from the input, return the matching
-// keyword token number or 0 if it's not a keyword.
-// Switch on the first letter so that we don't have
-// to waste time strcmp()ing against all the keywords.
-static int keyword(char *s) {
-  switch (*s) {
-    case 'p':
-      if (!strcmp(s, "print"))
-        return (T_PRINT);
-      break;
-  }
-  return (0);
-}
-
 // error: '::main' must return 'int'
 // void main(int argc, char *argv[])
 int main(int argc, char *argv[]) {
@@ -270,14 +205,10 @@ int main(int argc, char *argv[]) {
 
   //scanfile();
   scan(&Token);			// Get the first token from the input
-  /*
   n = binexpr(0);		// Parse the expression in the file
   printf("%d\n", interpretAST(n));	// Calculate the final result
   generatecode(n);
-  */
-  cgpreamble();
-  statements();
-  cgpostamble(); 
+
   fclose(Outfile);
   exit(0);
   // return 0; // 还需要返回值吗
@@ -410,7 +341,7 @@ struct ASTnode *binexpr(int ptp) {
     // Update the details of the current token.
     // If no tokens left, return just the left node
     tokentype = Token.token;
-    if (tokentype == T_SEMI)
+    if (tokentype == T_EOF)
       return (left);
   }
 
@@ -563,7 +494,7 @@ void cgpreamble()
 	"\tret\n"
 	"\n"
 	"\t.globl\tmain\n"
-	"\t# .type\tmain, @function\n"
+	"\t.type\tmain, @function\n"
 	"main:\n"
 	"\tpushq\t%rbp\n"
 	"\tmovq	%rsp, %rbp\n",
@@ -631,45 +562,4 @@ void cgprintint(int r) {
   fprintf(Outfile, "\tmovq\t%s, %%rdi\n", reglist[r]);
   fprintf(Outfile, "\tcall\tprintint\n");
   free_register(r);
-}
-
-// Parse one or more statements
-void statements(void) {
-  struct ASTnode *tree;
-  int reg;
-
-  while (1) {
-    // Match a 'print' as the first token
-    match(T_PRINT, "print");
-
-    // Parse the following expression and
-    // generate the assembly code
-    tree = binexpr(0);
-    reg = genAST(tree);
-    cgprintint(reg);
-    freeall_registers();
-
-    // Match the following semicolon
-    // and stop if we are at EOF
-    semi();
-    if (Token.token == T_EOF)
-      return;
-  }
-}
-
-// Ensure that the current token is t,
-// and fetch the next token. Otherwise
-// throw an error 
-void match(int t, char *what) {
-  if (Token.token == t) {
-    scan(&Token);
-  } else {
-    printf("%s expected on line %d\n", what, Line);
-    exit(1);
-  }
-}
-
-// Match a semicon and fetch the next token
-void semi(void) {
-  match(T_SEMI, ";");
 }
