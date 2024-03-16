@@ -105,10 +105,14 @@ int scan(struct token *t) {
   // Skip whitespace
   c = skip();
 
+  // printf("character %c on line %d\n", c, Line);
+  // DEBUG
+
   // Determine the token based on
   // the input character
   switch (c) {
   case EOF:
+    t->token = T_EOF; // Almost forgot
     return (0);
   case '+':
     t->token = T_PLUS;
@@ -307,6 +311,9 @@ struct ASTnode *binexpr(void) {
   return (n);
 }
 
+// List of AST operators
+static char *ASTop[] = { "+", "-", "*", "/" };
+
 // Given an AST, interpret the
 // operators in it and return
 // a final value.
@@ -319,6 +326,12 @@ int interpretAST(struct ASTnode *n) {
   if (n->right)
     rightval = interpretAST(n->right);
 
+  // Debug: Print what we are about to do
+  if (n->op == A_INTLIT)
+    printf("int %d\n", n->intvalue);
+  else
+    printf("%d %s %d\n", leftval, ASTop[n->op], rightval);
+
   switch (n->op) {
     case A_ADD:
       return (leftval + rightval);
@@ -329,6 +342,8 @@ int interpretAST(struct ASTnode *n) {
     case A_DIVIDE:
       return (leftval / rightval);
     case A_INTLIT:
+      // printf("n->intvalue:%d\n", n->intvalue);
+      // DEBUG
       return (n->intvalue);
     default:
       fprintf(stderr, "Unknown AST operator %d\n", n->op);
