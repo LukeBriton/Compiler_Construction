@@ -9,7 +9,6 @@
 // https://stackoverflow.com/questions/22485822/exit-is-not-working
 
 #define TEXTLEN         512             // Length of symbols in input
-#define NSYMBOLS        1024            // Number of symbol table entries
 
 // Token structure
 struct token {
@@ -19,16 +18,12 @@ struct token {
 
 // Tokens
 enum {
-  T_EOF, T_PLUS, T_MINUS, T_STAR, T_SLASH, T_INTLIT, T_SEMI, T_EQUALS,
-  T_IDENT,
-  // Keywords
-  T_PRINT, T_INT
+  T_EOF, T_PLUS, T_MINUS, T_STAR, T_SLASH, T_INTLIT, T_SEMI, T_PRINT
 };
 
 // AST node types
 enum {
-  A_ADD, A_SUBTRACT, A_MULTIPLY, A_DIVIDE, A_INTLIT,
-  A_IDENT, A_LVIDENT, A_ASSIGN
+  A_ADD, A_SUBTRACT, A_MULTIPLY, A_DIVIDE, A_INTLIT
 };
 
 // Abstract Syntax Tree structure
@@ -36,15 +31,7 @@ struct ASTnode {
   int op;                               // "Operation" to be performed on this tree
   struct ASTnode *left;                 // Left and right child trees
   struct ASTnode *right;
-  union {
-    int intvalue;		                    // For A_INTLIT, the integer value
-    int id;			                        // For A_IDENT, the symbol slot number
-  } v;
-};
-
-// Symbol table structure
-struct symtable {
-  char *name;                   // Name of a symbol
+  int intvalue;                         // For A_INTLIT, the integer value
 };
 
 /* undefined reference to `Line', `Infile', `Putback'...
@@ -53,7 +40,6 @@ extern int     Putback;
 extern FILE    *Infile;
 extern_ struct token    Token;
 extern_ char Text[TEXTLEN + 1];
-extern_ struct symtable Gsym[NSYMBOLS];
 */
 int     Line;
 int     Putback;
@@ -62,8 +48,6 @@ FILE    *Outfile;
 struct token    Token;
 
 char Text[TEXTLEN + 1];         // Last identifier scanned
-struct symtable Gsym[NSYMBOLS]; // Global symbol table
-static int Globs = 0;                   // Position of next free global symbol slot
 
 // Operator precedence for each token
 static int OpPrec[] = { 0, 10, 10, 20, 20,    0 };
@@ -86,17 +70,17 @@ struct ASTnode *mkastunary(int op, struct ASTnode *left, int intvalue);
 int arithop(int tok);
 static struct ASTnode *primary(void);
 struct ASTnode *binexpr(int);
-//int interpretAST(struct ASTnode *n);
+int interpretAST(struct ASTnode *n);
 
 static int op_precedence(int tokentype);
 
-static int genAST(struct ASTnode *n, int reg);
-//void generatecode(struct ASTnode *n);
+static int genAST(struct ASTnode *n);
+void generatecode(struct ASTnode *n);
 
 void freeall_registers();
 static int alloc_register();
 static void free_register(int reg);
-int cgloadint(int value);
+int cgload(int value);
 int cgadd(int r1, int r2);
 int cgmul(int r1, int r2);
 int cgsub(int r1, int r2);
@@ -104,29 +88,10 @@ int cgdiv(int r1, int r2);
 void cgprintint(int r);
 void cgpreamble();
 void cgpostamble();
-int cgloadglob(char *identifier);
-int cgstorglob(int r, char *identifier);
-void cgglobsym(char *sym);
 
-void print_statement();
-void assignment_statement();
 void statements();
-
 void match(int t, char *what);
 void semi();
-void ident();
-
-// Print out fatal messages
-void fatal(char *s);
-void fatals(char *s1, char *s2);
-void fatald(char *s, int d);
-void fatalc(char *s, int c);
-
-void var_declaration();
-
-int findglob(char *s);
-static int newglob();
-int addglob(char *name);
 
 // Get the next character from the input file.
 static int next(void) {
@@ -197,9 +162,6 @@ int scan(struct token *t) {
   case ';':
     t->token = T_SEMI;
     break;
-  case '=':
-    t->token = T_EQUALS;
-    break;
   default:
 
     // If it's a digit, scan the
@@ -218,12 +180,9 @@ int scan(struct token *t) {
         break;
       }
 
-      // Not a recognised keyword, so it must be an identifier
-      t->token = T_IDENT;
-      break;
       // Not a recognised keyword, so an error for now
-      //printf("Unrecognised symbol %s on line %d\n", Text, Line);
-      //exit(1);
+      printf("Unrecognised symbol %s on line %d\n", Text, Line);
+      exit(1);
     }
     // The character isn't part of any recognised token, error
     printf("Unrecognised character %c on line %d\n", c, Line);
@@ -292,10 +251,6 @@ static int scanident(int c, char *buf, int lim) {
 // to waste time strcmp()ing against all the keywords.
 static int keyword(char *s) {
   switch (*s) {
-    case 'i':
-      if (!strcmp(s, "int"))
-        return (T_INT);
-      break;
     case 'p':
       if (!strcmp(s, "print"))
         return (T_PRINT);
@@ -374,7 +329,7 @@ struct ASTnode *mkastnode(int op, struct ASTnode *left,
   n->op = op;
   n->left = left;
   n->right = right;
-  n->v.intvalue = intvalue;
+  n->intvalue = intvalue;
   return (n);
 }
 
@@ -409,33 +364,19 @@ int arithop(int tok) {
 // AST node representing it.
 static struct ASTnode *primary(void) {
   struct ASTnode *n;
-  int id;
 
+  // For an INTLIT token, make a leaf AST node for it
+  // and scan in the next token. Otherwise, a syntax error
+  // for any other token type.
   switch (Token.token) {
     case T_INTLIT:
-      // For an INTLIT token, make a leaf AST node for it
       n = mkastleaf(A_INTLIT, Token.intvalue);
-      break;
-
-    case T_IDENT:
-      // Check that this identifier exists
-      id = findglob(Text);
-      if (id == -1)
-        fatals("Unknown variable", Text);
-
-      // Make a leaf AST node for it
-      n = mkastleaf(A_IDENT, id);
-      break;
-
+      scan(&Token);
+      return (n);
     default:
-      // a syntax error for any other token type.
       fprintf(stderr, "syntax error on line %d\n", Line);
       exit(1);
   }
-
-  // Scan in the next token and return the leaf node
-  scan(&Token);
-  return (n);
 }
 
 // Return an AST tree whose root is a binary operator
@@ -484,7 +425,6 @@ static char *ASTop[] = { "+", "-", "*", "/" };
 // Given an AST, interpret the
 // operators in it and return
 // a final value.
-/*
 int interpretAST(struct ASTnode *n) {
   int leftval, rightval;
 
@@ -496,7 +436,7 @@ int interpretAST(struct ASTnode *n) {
 
   // Debug: Print what we are about to do
   if (n->op == A_INTLIT)
-    printf("int %d\n", n->v.intvalue);
+    printf("int %d\n", n->intvalue);
   else
     printf("%d %s %d\n", leftval, ASTop[n->op], rightval);
 
@@ -512,12 +452,12 @@ int interpretAST(struct ASTnode *n) {
     case A_INTLIT:
       // printf("n->intvalue:%d\n", n->intvalue);
       // DEBUG
-      return (n->v.intvalue);
+      return (n->intvalue);
     default:
       fprintf(stderr, "Unknown AST operator %d\n", n->op);
       exit(1);
   }
-*/
+}
 
 // Check that we have a binary operator and
 // return its precedence.
@@ -525,32 +465,26 @@ static int op_precedence(int tokentype) {
   int prec = OpPrec[tokentype];
   if (prec == 0) {
     fprintf(stderr, "syntax error on line %d, token %d\n", Line, tokentype);
-    //DEBUG
-    //exit(1);
+    exit(1);
   }
   return (prec);
 }
 
 // Given an AST, generate
 // assembly code recursively
-static int genAST(struct ASTnode *n, int reg) {
+static int genAST(struct ASTnode *n) {
   int leftreg, rightreg;
 
   // Get the left and right sub-tree values
-  if (n->left) leftreg = genAST(n->left, -1);
-  if (n->right) rightreg = genAST(n->right, leftreg);
+  if (n->left) leftreg = genAST(n->left);
+  if (n->right) rightreg = genAST(n->right);
 
   switch (n->op) {
     case A_ADD:      return (cgadd(leftreg,rightreg));
     case A_SUBTRACT: return (cgsub(leftreg,rightreg));
     case A_MULTIPLY: return (cgmul(leftreg,rightreg));
     case A_DIVIDE:   return (cgdiv(leftreg,rightreg));
-    case A_INTLIT:   return (cgloadint(n->v.intvalue));
-    case A_IDENT:    return (cgloadglob(Gsym[n->v.id].name));
-    case A_LVIDENT:  return (cgstorglob(reg, Gsym[n->v.id].name));
-    case A_ASSIGN:
-      // The work has already been done, return the result
-      return (rightreg);
+    case A_INTLIT:   return (cgload(n->intvalue));
 
     default:
       fprintf(stderr, "Unknown AST operator %d\n", n->op);
@@ -558,7 +492,6 @@ static int genAST(struct ASTnode *n, int reg) {
   }
 }
 
-/*
 void generatecode(struct ASTnode *n) {
   int reg;
 
@@ -567,7 +500,6 @@ void generatecode(struct ASTnode *n) {
   cgprintint(reg);      // Print the register with the result as an int
   cgpostamble();
 }
-*/
 
 // List of available registers
 // and their names
@@ -650,7 +582,7 @@ void cgpostamble()
 
 // Load an integer literal value into a register.
 // Return the number of the register
-int cgloadint(int value) {
+int cgload(int value) {
 
   // Get a new register
   int r= alloc_register();
@@ -695,103 +627,34 @@ int cgdiv(int r1, int r2) {
   return(r1);
 }
 
-// Call printint() with the given register
 void cgprintint(int r) {
   fprintf(Outfile, "\tmovq\t%s, %%rdi\n", reglist[r]);
   fprintf(Outfile, "\tcall\tprintint\n");
   free_register(r);
 }
 
-// Load a value from a variable into a register.
-// Return the number of the register
-int cgloadglob(char *identifier) {
-  // Get a new register
-  int r = alloc_register();
-
-  // Print out the code to initialise it
-  fprintf(Outfile, "\tmovq\t%s(\%%rip), %s\n", identifier, reglist[r]);
-  return (r);
-}
-
-// Store a register's value into a variable
-int cgstorglob(int r, char *identifier) {
-  fprintf(Outfile, "\tmovq\t%s, %s(\%%rip)\n", reglist[r], identifier);
-  return (r);
-}
-
-// Generate a global symbol
-void cgglobsym(char *sym) {
-  fprintf(Outfile, "\t.comm\t%s,8,8\n", sym);
-}
-
 // Parse one or more statements
 void statements(void) {
-  while (1) {
-    switch (Token.token) {
-    case T_PRINT:
-      print_statement();
-      break;
-    case T_INT:
-      var_declaration();
-      break;
-    case T_IDENT:
-      assignment_statement();
-      break;
-    case T_EOF:
-      return;
-    default:
-      fatald("Syntax error, token", Token.token);
-    }
-  }
-}
-
-void print_statement(void) {
   struct ASTnode *tree;
   int reg;
-    
-  // Match a 'print' as the first token
-  match(T_PRINT, "print");
 
-  // Parse the following expression and
-  // generate the assembly code
-  tree = binexpr(0);
-  reg = genAST(tree, -1);
-  cgprintint(reg);
-  freeall_registers();
+  while (1) {
+    // Match a 'print' as the first token
+    match(T_PRINT, "print");
 
-  // Match the following semicolon
-  // and stop if we are at EOF
-  semi();
-}
+    // Parse the following expression and
+    // generate the assembly code
+    tree = binexpr(0);
+    reg = genAST(tree);
+    cgprintint(reg);
+    freeall_registers();
 
-void assignment_statement(void) {
-  struct ASTnode *left, *right, *tree;
-  int id;
-
-  // Ensure we have an identifier
-  ident();
-
-  // Check it's been defined then make a leaf node for it
-  if ((id = findglob(Text)) == -1) {
-    fatals("Undeclared variable", Text);
+    // Match the following semicolon
+    // and stop if we are at EOF
+    semi();
+    if (Token.token == T_EOF)
+      return;
   }
-  right = mkastleaf(A_LVIDENT, id);
-
-  // Ensure we have an equals sign
-  match(T_EQUALS, "=");
-
-  // Parse the following expression
-  left = binexpr(0);
-
-  // Make an assignment AST tree
-  tree = mkastnode(A_ASSIGN, left, right, 0);
-
-  // Generate the assembly code for the assignment
-  genAST(tree, -1);
-  freeall_registers();
-
-  // Match the following semicolon
-  semi();
 }
 
 // Ensure that the current token is t,
@@ -809,75 +672,4 @@ void match(int t, char *what) {
 // Match a semicon and fetch the next token
 void semi(void) {
   match(T_SEMI, ";");
-}
-void ident(void) {
-  match(T_IDENT, "identifier");
-}
-
-// Print out fatal messages
-void fatal(char *s) {
-  fprintf(stderr, "%s on line %d\n", s, Line); exit(1);
-}
-
-void fatals(char *s1, char *s2) {
-  fprintf(stderr, "%s:%s on line %d\n", s1, s2, Line); exit(1);
-}
-
-void fatald(char *s, int d) {
-  fprintf(stderr, "%s:%d on line %d\n", s, d, Line); exit(1);
-}
-
-void fatalc(char *s, int c) {
-  fprintf(stderr, "%s:%c on line %d\n", s, c, Line); exit(1);
-}
-
-// Parse the declaration of a variable
-void var_declaration(void) {
-
-  // Ensure we have an 'int' token followed by an identifier
-  // and a semicolon. Text now has the identifier's name.
-  // Add it as a known identifier
-  match(T_INT, "int");
-  ident();
-  addglob(Text);
-  cgglobsym(Text);
-  semi();
-}
-
-// Determine if the symbol s is in the global symbol table.
-// Return its slot position or -1 if not found.
-int findglob(char *s) {
-  int i;
-
-  for (i = 0; i < Globs; i++) {
-    if (*s == *Gsym[i].name && !strcmp(s, Gsym[i].name))
-      return (i);
-  }
-  return (-1);
-}
-
-// Get the position of a new global symbol slot, or die
-// if we've run out of positions.
-static int newglob(void) {
-  int p;
-
-  if ((p = Globs++) >= NSYMBOLS)
-    fatal("Too many global symbols");
-  return (p);
-}
-
-// Add a global symbol to the symbol table.
-// Return the slot number in the symbol table
-int addglob(char *name) {
-  int y;
-
-  // If this is already in the symbol table, return the existing slot
-  if ((y = findglob(name)) != -1)
-    return (y);
-
-  // Otherwise get a new slot, fill it in and
-  // return the slot number
-  y = newglob();
-  Gsym[y].name = strdup(name);
-  return (y);
 }
