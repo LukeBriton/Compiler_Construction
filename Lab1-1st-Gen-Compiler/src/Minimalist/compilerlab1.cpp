@@ -39,7 +39,7 @@ int value[52]; // 变量的值
 // 问题在于：很受立即数长度的限制。
 // 采用 x86 Intel Syntax，看着比 AT&T 直观
 // 又无须像 MIPS 一样又是 lui 又是 ori，连 32 位的都这么麻烦。
-// stack<int> operands; 
+//stack<int> operands; 
 
 bool isKeyword(const string& str) {
     return str == "int" || str == "return";
@@ -117,7 +117,7 @@ int main(int argc, char *argv[]) {
                             // 不考虑上限，反正到不了。
                             // 不考虑重复声明。 // 算了最好之后补上一个检验。
                             // 或者在IDENTIFIER处。
-                            // esp += 4;
+                            //esp += 4;
                         }
                         else if (token == "return") // 没必要 else if，此处方便阅读。
                         {
