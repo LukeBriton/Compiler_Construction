@@ -94,7 +94,13 @@ int main(int argc, char *argv[]) {
         cerr << "Error: Could not open the file." << endl;
         return 1;
     }
-
+    //cout << ".intel_syntax noprefix" << endl;
+    //cout << ".global main" << endl;
+    //cout << ".type main, @function" << endl;
+    //cout << "main:" << endl;
+    //cout << "push ebp" << endl;
+    //cout << "mov ebp, esp" << endl;
+    //cout << "sub esp, 0x100" << endl;
     string line;
     while (getline(inputFile, line)) {
         string token;

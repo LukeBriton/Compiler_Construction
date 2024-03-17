@@ -1,0 +1,14 @@
+int a;
+a = 200;
+a = 300;
+
+int b = 2;
+a = b + a;
+int c =
+1
+2
+3;
+
+b = c / a;
+
+return b;
