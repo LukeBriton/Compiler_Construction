@@ -1,7 +1,13 @@
 int a ; 
-int b ; 
-int d ; 
-a = 1 ; 
-b = 2 ; 
+int b ;  int d ; 
+int c ;
+
+
+a        = 
+114 ; 
+
+b = 514 ; 
 d = a + b ; 
+c = a + 8 * 9 / d;
 return d ; 
+
