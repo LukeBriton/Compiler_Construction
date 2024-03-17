@@ -211,15 +211,28 @@ int main(int argc, char *argv[]) {
                 token.clear();
             }
             else if (isSeparator(ch)) {
+                /* MIPS */
+                if(isDeclaration)
+                {
+                    cout << "sw $zero, -" << alphabet_pos[getAlphabetIndex(lval)] << "($fp)" << endl;
+                }
+                /* MIPS */
                 if(isAssignment)
                 {
                     value[getAlphabetIndex(lval)] = rval;
-                    cout << "mov eax, " << rval << endl;
-                    cout << "mov DWORD PTR [ebp-" << alphabet_pos[getAlphabetIndex(lval)] << "], eax" << endl;
+                    /* MIPS */
+                    cout << "li $t0, " << rval << endl;
+                    cout << "sw $t0, -" << alphabet_pos[getAlphabetIndex(lval)] << "($fp)" << endl;
+                    /* x86 Intel Syntax */
+                    //cout << "mov eax, " << rval << endl;
+                    //cout << "mov DWORD PTR [ebp-" << alphabet_pos[getAlphabetIndex(lval)] << "], eax" << endl;
                 }
                 else if(isReturn)
                 {
-                    cout << "mov eax, " << rval << endl;
+                    /* MIPS */
+                    cout << "li $v0, " << rval << endl;
+                    /* x86 Intel Syntax */
+                    //cout << "mov eax, " << rval << endl;
                 }
 
                 lval = 0;
