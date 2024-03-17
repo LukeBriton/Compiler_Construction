@@ -46,7 +46,7 @@ Lab1-1st-Gen-Compiler/src/Flex_Bison/
 
 # Kernel Module Compile Results
 *.mod*
-*.cmd
+# *.cmd
 .tmp_versions/
 modules.order
 Module.symvers
