@@ -287,7 +287,7 @@ Flex lets you say `%option nodefault` at the top of the scanner to tell it not t
 The `%yylineno` option tells flex to define an integer variable called `yylineno` and to maintain the current line number in it. What that means is that every time the scanner reads a newline character, it increments `yylineno`, and if the scanner backs up over a newline (using some features we’ll get to later), it decrements it. It’s still up to you to initialize `yylineno` to 1 at the beginning of each file and to save and restore it if you’re handling include files. Even with those limitations, it’s still easier than doing line numbers by hand. (In this example, there’s only a single pattern that matches `\n`, which wouldn’t be hard to get right, but it’s quite common to have several patterns that match, causing hard-to-track bugs when some but not all of them update the line number.) P32
 
 ### Concordance
-
+	
 语境共现/定位索引
 
 并列索引（港）
@@ -295,6 +295,9 @@ The `%yylineno` option tells flex to define an integer variable called `yylineno
 用語索引（韩）
 
 https://www.corpus4u.org/threads/1605/
+
+an unanalyzed list of words or phrases which appear in a book
+
 http://www.elephant.org.il/indexing/index-vs-concordance
 
 ###
