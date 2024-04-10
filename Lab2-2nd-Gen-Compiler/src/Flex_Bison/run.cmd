@@ -1,5 +1,5 @@
 win_bison -d MyBison.y
 
 win_flex MyFlex.l
-gcc lex.yy.c MyBison.tab.c -o Compiler.exe
+gcc MyBison.tab.c Function.c lex.yy.c -o Compiler.exe
 Compiler
