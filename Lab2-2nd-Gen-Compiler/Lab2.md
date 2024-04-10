@@ -34,7 +34,11 @@ https://stackoverflow.com/questions/623503/what-is-the-difference-between-flex-l
 
 **The Fast Lexical Analyzer - scanner generator for lexing in C and C++**
 
-**手册：https://westes.github.io/flex/manual/**
+**手册（线上）：https://westes.github.io/flex/manual/**
+
+**手册（pdf，January 2023，无目录）：[Lexical Analysis with Flex](https://www.cse.iitk.ac.in/users/swarnendu/courses/spring2024-cs335/flex.pdf)**
+
+**手册（pdf，May 2017，有目录）：[Lexical Analysis with Flex](https://www.ksi.mff.cuni.cz/teaching/nswi098-web/download/flex.pdf)**
 
 `flex` is a tool for generating *scanners*: programs which recognized lexical patterns in text. `flex` reads the given input files, or its standard input if no file names are given, for a description of a scanner to generate. The description is in the form of pairs of regular expressions and C code, called *rules*. `flex` generates as output a C source file, `` `lex.yy.c' ``, which defines a routine `` `yylex()' ``. This file is compiled and linked with the `` `-lfl' `` library to produce an executable. When the executable is run, it analyzes its input for occurrences of the regular expressions. Whenever it finds one, it executes the corresponding C code. [^10]
 
@@ -126,7 +130,6 @@ Checks if the given character is either
 When the generated scanner is run, it analyzes its input looking for strings which match any of its patterns. If it finds more than one match, it takes the one matching the most text (for trailing context rules, this includes the length of the trailing part, even though it will then be returned to the input). If it finds two or more matches of the same length, the rule listed first in the `flex` input file is chosen.
 
 当生成的扫描器运行时，它分析其输入，寻找与其任何模式匹配的字符串。如果它找到多于一个的匹配，它会选择匹配最多文本的那个（对于后续上下文规则，这包括后续部分的长度，尽管然后它会被返回到输入中）。如果它找到两个或更多长度相同的匹配，会选择在`flex`输入文件中首先列出的规则。
-
 
 ### noyywrap
 
@@ -300,8 +303,23 @@ an unanalyzed list of words or phrases which appear in a book
 
 http://www.elephant.org.il/indexing/index-vs-concordance
 
-###
+### Unicode
 
+At the moment, flex only generates 8-bit scanners which basically limits you to use UTF-8. So if you have a pattern:
+
+```C
+肖晗   { printf ("xiaohan\n"); }
+```
+
+it will work as expected, as the sequence of bytes in the pattern and in the input will be the same. What's more difficult is character classes. If you want to match either the character 肖 or 晗, you can't write:
+
+```C
+[肖晗]   { printf ("xiaohan/2\n"); }
+```
+
+because this will match each of the six bytes 0xe8, 0x82, 0x96, 0xe6, 0x99 and 0x97, which in practice means that if you supply `肖晗` as the input, the pattern will match six times. So in this simple case, you have to rewrite the pattern to `(肖|晗)`.
+
+[Flex(lexer) support for unicode](https://stackoverflow.com/questions/9611682/flexlexer-support-for-unicode)
 
 ## Parser(Syntactic Analysis, 句法分析)[^par]
 
@@ -321,6 +339,17 @@ From [linux symlink manual](https://man7.org/linux/man-pages/man7/symlink.7.html
 So a symbolic link is one more file, just as a `README.md` or a `Makefile`. Git just stores the contents of the link (i.e. the aforementioned path of the file system object that it links to) in a 'blob' just like it would for any other file. It then stores the name, mode and type (including the fact that it is a symlink) in the tree object that represents its containing directory.
 
 https://stackoverflow.com/questions/954560/how-does-git-handle-symbolic-links
+
+### OPs
+
+Bison assigns each rule the precedence of the rightmost token on the righthand side; if that token has no precedence assigned, the rule has no precedence of its own. When bison encounters a shift/reduce conflict, it consults the table of precedence, and if all the rules involved in the conflict have a precedence assigned, it uses precedence\
+to resolve the conflict.
+
+Bison为每条规则分配了右侧最右边标记的优先级；如果该标记没有分配优先级，那么这条规则就没有自己的优先级。当Bison遇到移入/归约冲突时，它会查询优先级表，如果所有涉及冲突的规则都被分配了优先级，它就使用优先级来解决冲突。[^op]
+
+![op_precedence.png](./img/op_precedence.png "op_precedence.png")
+
+![op_associativity.png](./img/op_associativity.png)[^op_p&a]
 
 ## Elaborator(Semantic Analysis, 语义分析)[^ela]
 
@@ -412,11 +441,6 @@ https://github.com/JuliaHubOSS/llvm-cbe
 
 ## 备忘
 
-
-
-
-
-
 ## 教程
 
 [Flex(scanner)/Bison(parser)词法语法分析工作原理 - 知乎](https://zhuanlan.zhihu.com/p/120812270)
@@ -449,7 +473,7 @@ https://github.com/JuliaHubOSS/llvm-cbe
 
 [正则表达式在线测试](https://www.jyshare.com/front-end/854/)
 
-[^0]: ~~日式转写：Shodai Konpa~~
+[^0]: ~~日式转写：Nidai Konpa~~
 [^1]: https://www.cs.mcgill.ca/~cs520/2020/images/dragon.lowres.jpg
 [^2]: Engineering a Compiler 3rd ed. Page xxii
 [^3]: 同上 Page 4
@@ -472,5 +496,7 @@ https://github.com/JuliaHubOSS/llvm-cbe
 [^sta]: [flex & bison](https://web.iitd.ac.in/~sumeet/flex__bison.pdf) P28 P136
 [^sub]: [flex & bison](https://web.iitd.ac.in/~sumeet/flex__bison.pdf) P122
 [^par]: 颇多用 syntax 修饰的，还有叫 Grammar Analysis 的, 讲道理 grammar 才是该译作“语法/文法”的。
+[^op]: [flex & bison](https://web.iitd.ac.in/~sumeet/flex__bison.pdf) P60
+[^op_p&a]: [Flex and Bison Tutorial](https://www.capsl.udel.edu/courses/cpeg421/2012/slides/Tutorial-Flex_Bison.pdf) P44, 45
 [^ela]: http://staff.ustc.edu.cn/~bjhua/courses/compiler/2014/labs/lab2/index.html
 [^gre]: https://westes.github.io/flex/manual/Matching.html
