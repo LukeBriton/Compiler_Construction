@@ -4,6 +4,8 @@
 
 单另将两个“快捷方式”放在同一目录内是为了编译以及测试的便利。
 
+`Scanner` 和 `Parser` 目录下的符号链接 `Declare.h` 均对应 `Flex_Bison` 中的 `Declare.h`，由于不确定编译器引用头文件时的路径，为稳妥起见而放。
+
 > A symbolic link is a special type of file whose contents are a string that is the pathname of another file, the file to which the link refers. (The contents of a symbolic link can be read using readlink(2).)
 
 So a symbolic link is one more file, just as a `README.md` or a `Makefile`. Git just stores the contents of the link (i.e. the aforementioned path of the file system object that it links to) in a 'blob' just like it would for any other file. It then stores the name, mode and type (including the fact that it is a symlink) in the tree object that represents its containing directory.
