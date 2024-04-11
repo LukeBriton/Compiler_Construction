@@ -91,7 +91,7 @@ symlist : ID { $$ = newsymlist($1, NULL); }
 
 calclist: /* nothing */
     | calclist stmt CRLF {
-        printf("= %4.4g\n> ", eval($2));
+        printf("= %d\n> ", eval($2));
         treefree($2);
     }
     | calclist LET ID '(' symlist ')' '=' list CRLF {
