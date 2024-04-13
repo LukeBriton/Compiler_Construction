@@ -644,117 +644,117 @@ YY_RULE_SETUP
 case 2:
 YY_RULE_SETUP
 #line 14 "lab2-fl.l"
-{printf("KEYWORD: %s\n", yytext);}
+{fprintf(yyout,"KEYWORD:%s\n", yytext);}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
 #line 15 "lab2-fl.l"
-{printf("ID: %s\n", yytext);}
+{fprintf(yyout,"ID:%s\n", yytext);}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
 #line 16 "lab2-fl.l"
-{printf("CONSTANT: %s\n",yytext);}
+{fprintf(yyout,"CONSTANT:%s\n",yytext);}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
 #line 17 "lab2-fl.l"
-{printf("ASSIGN: %s\n",yytext);}
+{fprintf(yyout,"ASSIGN:%s\n",yytext);}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
 #line 18 "lab2-fl.l"
-{printf("ADD: %s\n",yytext);}
+{fprintf(yyout,"ADD:%s\n",yytext);}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
 #line 19 "lab2-fl.l"
-{printf("SUB: %s\n",yytext);}
+{fprintf(yyout,"SUB:%s\n",yytext);}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
 #line 20 "lab2-fl.l"
-{printf("MUL: %s\n",yytext);}
+{fprintf(yyout,"MUL:%s\n",yytext);}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
 #line 21 "lab2-fl.l"
-{printf("DIV: %s\n",yytext);}
+{fprintf(yyout,"DIV:%s\n",yytext);}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
 #line 22 "lab2-fl.l"
-{printf("MOD: %s\n",yytext);}
+{fprintf(yyout,"MOD:%s\n",yytext);}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
 #line 23 "lab2-fl.l"
-{printf("LT: %s\n",yytext);}
+{fprintf(yyout,"LT:%s\n",yytext);}
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
 #line 24 "lab2-fl.l"
-{printf("LE: %s\n",yytext);}
+{fprintf(yyout,"LE:%s\n",yytext);}
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
 #line 25 "lab2-fl.l"
-{printf("GT: %s\n",yytext);}
+{fprintf(yyout,"GT:%s\n",yytext);}
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
 #line 26 "lab2-fl.l"
-{printf("GE: %s\n",yytext);}
+{fprintf(yyout,"GE:%s\n",yytext);}
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
 #line 27 "lab2-fl.l"
-{printf("EQ: %s\n",yytext);}
+{fprintf(yyout,"EQ:%s\n",yytext);}
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
 #line 28 "lab2-fl.l"
-{printf("NEQ: %s\n",yytext);}
+{fprintf(yyout,"NEQ:%s\n",yytext);}
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
 #line 29 "lab2-fl.l"
-{printf("AND: %s\n",yytext);}
+{fprintf(yyout,"AND:%s\n",yytext);}
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
 #line 30 "lab2-fl.l"
-{printf("OR: %s\n",yytext);}
+{fprintf(yyout,"OR:%s\n",yytext);}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
 #line 31 "lab2-fl.l"
-{printf("XOR: %s\n",yytext);}
+{fprintf(yyout,"XOR:%s\n",yytext);}
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
 #line 32 "lab2-fl.l"
-{printf("SEMI: %s\n",yytext);}
+{fprintf(yyout,"SEMI:%s\n",yytext);}
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
 #line 33 "lab2-fl.l"
-{printf("LB: %s\n",yytext);}
+{fprintf(yyout,"LB:%s\n",yytext);}
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
 #line 34 "lab2-fl.l"
-{printf("RB: %s\n",yytext);}
+{fprintf(yyout,"RB:%s\n",yytext);}
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
 #line 35 "lab2-fl.l"
-{printf("LP: %s\n",yytext);}
+{fprintf(yyout,"LP:%s\n",yytext);}
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
 #line 36 "lab2-fl.l"
-{printf("RP: %s\n",yytext);}
+{fprintf(yyout,"RP:%s\n",yytext);}
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
@@ -1659,6 +1659,7 @@ if(argc > 1)
             return (1);
         }
     }
+yyout=fopen(argv[2],"w");
 yylex();
   return 0;
 }
