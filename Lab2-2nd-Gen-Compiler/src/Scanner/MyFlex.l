@@ -15,7 +15,7 @@
 
 %option noyywrap yylineno
 
-%x COMMENT
+/*%x COMMENT*/
 
 /*** Definition section ***/
 %{
@@ -38,24 +38,63 @@
     /* { 和 Regex 间必须有 whitespeace*/
     /* 否则也会 unrecognized，注意，报错行号其实会报在下一行。 */
 
+
     /* comments，抄书 */
-"/*"                { BEGIN(COMMENT); }
-<COMMENT>"*/"       { BEGIN(INITIAL); }
-<COMMENT>([^*]|\n)+|.
-<COMMENT><<EOF>>    { printf("Unterminated comment\n"); }
+    /* 疑似很有问题，现已删去。 */
+
 
     /* 关键字： int, return, main(?) */
+
     /* keywords */
-"if" { return IF; }
+    /* "if" { return IF; } */
     /* TODO */
     /* In languages that don’t have a THEN keyword... */
     /* flex & bison P188 */
-"then" { return THEN; }
-"else" { return ELSE; }
-"while" { return WHILE; }
-"do" { return DO; }
-"let" { return LET; }
+    /* "then" { return THEN; } */
+    /* "else" { return ELSE; } */
+    /* "while" { return WHILE; } */
+    /* "do" { return DO; } */
 "return" { return RETURN; }
+"main" { return MAIN; }
+
+    /* declaration keywords */
+    /* 怀疑之后有必要统一设为 Type，*/
+    /* 依靠 yylval 区分具体类型 */
+"int" {return INT; }
+
+
+    /* 操作符： =、 +、 -、 *、 / */
+
+    /* single character ops */
+    /* 掉了"=", Silly of me */
+    /* 大概暂时不用区分指针、取址 */
+"+" |
+"-" |
+"*" |
+"/" |
+"%" |
+"=" |
+"&" |
+"|" |
+"^" |
+"(" |
+")" |
+"{" |
+"}" |
+"," |
+";" { return yytext[0]; }
+
+    /* comparison ops, all are a CMP token */
+">" { yylval.fn = 1; return CMP; }
+"<" { yylval.fn = 2; return CMP; }
+"!=" { yylval.fn = 3; return CMP; }
+"==" { yylval.fn = 4; return CMP; }
+">=" { yylval.fn = 5; return CMP; }
+"<=" { yylval.fn = 6; return CMP; }
+
+
+    /* built-in functions */
+"println_int" { yylval.fn = B_println_int; return FUNC; } /* MyFlex.l:116: warning, rule cannot be matched */
 
     /* 标识符：[A-Za-z_][0-9A-Za-z_]*/
     /* 不含 UCN, implementation-defined 字符。*/
@@ -66,6 +105,7 @@
                     //printf("Identifier\n");
                     return ID;
                 }
+
 
     /* 常量：十进制整型，如 1、 223、 10 等 */
     /* 此处疑似实际指的是字面量，且局限在了整型字面量中的 decimal-literal */
@@ -84,32 +124,6 @@
                     return NUMBER;
                 }
 
-    /* 操作符： =、 +、 -、 *、 / */
-    /* single character ops */
-"+" |
-"-" |
-"*" |
-"/" |
-"%" |
-"|" |
-"(" |
-")" |
-"{" |
-"}" { return yytext[0]; }
-
-    /* comparison ops, all are a CMP token */
-">" { yylval.fn = 1; return CMP; }
-"<" { yylval.fn = 2; return CMP; }
-"!=" { yylval.fn = 3; return CMP; }
-"==" { yylval.fn = 4; return CMP; }
-">=" { yylval.fn = 5; return CMP; }
-"<=" { yylval.fn = 6; return CMP; }
-
-    /* built-in functions */
-"sqrt" { yylval.fn = B_sqrt; return FUNC; }
-"exp" { yylval.fn = B_exp; return FUNC; }
-"log" { yylval.fn = B_log; return FUNC; }
-"print" { yylval.fn = B_print; return FUNC; }
 
 "//".*
 [ \t] /* ignore whitespace */
