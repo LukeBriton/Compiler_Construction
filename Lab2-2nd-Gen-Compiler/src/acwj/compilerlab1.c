@@ -324,6 +324,7 @@ int main(int argc, char *argv[]) {
   statements();
   cgpostamble(); 
   fclose(Outfile);
+  // printf("Hello there"); // DEBUG
   exit(0);
   // return 0; // 还需要返回值吗
 }
@@ -449,7 +450,7 @@ struct ASTnode *binexpr(int ptp) {
 
   // If no tokens left, return just the left node
   tokentype = Token.token;
-  if (Token.token == T_EOF)
+  if (Token.token == T_SEMI) // ... 误作 T_EOF，愚蠢
     return (left);
 
   // While the precedence of this token is
@@ -524,6 +525,7 @@ int interpretAST(struct ASTnode *n) {
 static int op_precedence(int tokentype) {
   int prec = OpPrec[tokentype];
   if (prec == 0) {
+    printf("tokentype of T_SEMI is %d\n", T_SEMI);
     fprintf(stderr, "syntax error on line %d, token %d\n", Line, tokentype);
     //DEBUG
     //exit(1);
