@@ -30,7 +30,7 @@ void update_regnum(){
 }
 
 //运算符的优先级
-int getPrecedence(string op){
+int getPrecedence(string& op){
     if(op == "|") return 1;
     if(op == "^") return 2;
     if(op == "&") return 3;
@@ -42,7 +42,7 @@ int getPrecedence(string op){
 }
 
 //将复杂赋值语句中“=”后面的表达式转化为后缀表达式
-vector<Token> Infix2Suffix(vector<Token> assignment){
+vector<Token> Infix2Suffix(vector<Token>& assignment){
     stack<Token> stack;
     vector<Token> suffix;
     suffix.reserve(100);
@@ -79,7 +79,7 @@ vector<Token> Infix2Suffix(vector<Token> assignment){
 
 
 //处理int声明语句，主要用来记录各个变量声明的顺序
-void Process_Declaration(string ID){
+void Process_Declaration(string& ID){
     //cout<<"int"<<ID<<endl;
     IDs.push_back(ID);
     ID_Number++;
@@ -87,7 +87,7 @@ void Process_Declaration(string ID){
 
 //处理println_int语句
 //简单，找到要打印的那个变量是第几个声明的就行了
-void Process_Println(string ID){
+void Process_Println(string& ID){
     //cout<<"print "<<ID<<endl; 
     int index = find(IDs.begin(), IDs.end(), ID) - IDs.begin();
     cout<<"lw $a0, "<<-4*(index + 1)<<"(&fp)"<<endl;
@@ -109,7 +109,7 @@ void Process_Return(){
 };
 
 //处理赋值语句
-void Process_Assignment(vector<Token> assignment){
+void Process_Assignment(vector<Token>& assignment){
     //for(vector<Token>::iterator it = assignment.begin(); it != assignment.end(); it++){
     //    cout<<(*it).value<<" ";
     //}
