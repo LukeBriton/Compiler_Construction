@@ -525,7 +525,7 @@ int interpretAST(struct ASTnode *n) {
 static int op_precedence(int tokentype) {
   int prec = OpPrec[tokentype];
   if (prec == 0) {
-    printf("tokentype of T_SEMI is %d\n", T_SEMI);
+    // printf("tokentype of T_SEMI is %d\n", T_SEMI);
     fprintf(stderr, "syntax error on line %d, token %d\n", Line, tokentype);
     //DEBUG
     //exit(1);
