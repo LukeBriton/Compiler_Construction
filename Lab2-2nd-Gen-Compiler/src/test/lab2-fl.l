@@ -1,6 +1,7 @@
 %{
 #include<stdio.h>
 #include<string.h>
+#include"defs.h"
 %}
 
 keyword			"int"|"return"|"main"|"println_int"
@@ -8,49 +9,48 @@ digit 			[0-9]
 letter 			[A-Za-z]
 id 				({letter}|_)({letter}|{digit}|_)*
 number 			[1-9]{digit}*|0
-vacancy 		[\t\n ]
+vacancy 		[\t\r\n ]
 %%
 {vacancy}+ ;
-{keyword}		{fprintf(yyout,"KEYWORD:%s\n", yytext);}
-{id}			{fprintf(yyout,"ID:%s\n", yytext);}
-{number} 		{fprintf(yyout,"CONSTANT:%s\n",yytext);}
-"=" 			{fprintf(yyout,"ASSIGN:%s\n",yytext);}
-"+" 			{fprintf(yyout,"ADD:%s\n",yytext);}
-"-" 			{fprintf(yyout,"SUB:%s\n",yytext);}
-"*"				{fprintf(yyout,"MUL:%s\n",yytext);}
-"/" 			{fprintf(yyout,"DIV:%s\n",yytext);}
-"%" 			{fprintf(yyout,"MOD:%s\n",yytext);}
-"<" 			{fprintf(yyout,"LT:%s\n",yytext);}
-"<=" 			{fprintf(yyout,"LE:%s\n",yytext);}
-">" 			{fprintf(yyout,"GT:%s\n",yytext);}
-">=" 			{fprintf(yyout,"GE:%s\n",yytext);}
-"==" 			{fprintf(yyout,"EQ:%s\n",yytext);}
-"!=" 			{fprintf(yyout,"NEQ:%s\n",yytext);}
-"&"				{fprintf(yyout,"AND:%s\n",yytext);}
-"|"				{fprintf(yyout,"OR:%s\n",yytext);}
-"^"				{fprintf(yyout,"XOR:%s\n",yytext);}
-";"				{fprintf(yyout,"SEMI:%s\n",yytext);}
-"{"				{fprintf(yyout,"LB:%s\n",yytext);}
-"}"				{fprintf(yyout,"RB:%s\n",yytext);}
-"(" 			{fprintf(yyout,"LP:%s\n",yytext);}
-")" 			{fprintf(yyout,"RP:%s\n",yytext);}
+{keyword}		{TokenIn("KEYWORD", yytext);}
+{id}			{TokenIn("ID", yytext);}
+{number} 		{TokenIn("CONSTANT", yytext);}
+"=" 			{TokenIn("ASSIGN", yytext);}
+"+" 			{TokenIn("ADD", yytext);}
+"-" 			{TokenIn("SUB", yytext);}
+"*"				{TokenIn("MUL", yytext);}
+"/" 			{TokenIn("DIV", yytext);}
+"%" 			{TokenIn("MOD", yytext);}
+"<" 			{TokenIn("LT", yytext);}
+"<=" 			{TokenIn("LE", yytext);}
+">" 			{TokenIn("GT", yytext);}
+">=" 			{TokenIn("GE", yytext);}
+"==" 			{TokenIn("EQ", yytext);}
+"!=" 			{TokenIn("NEQ", yytext);}
+"&"				{TokenIn("AND", yytext);}
+"|"				{TokenIn("OR", yytext);}
+"^"				{TokenIn("XOR", yytext);}
+","				{TokenIn("COMMA", yytext);}
+";"				{TokenIn("SEMI", yytext);}
+"{"				{TokenIn("LB", yytext);}
+"}"				{TokenIn("RB", yytext);}
+"(" 			{TokenIn("LP", yytext);}
+")" 			{TokenIn("RP", yytext);}
+    /* Eat undifined chars up */
+    /* 否则就会像 e07.c 一样，开头的 “ï»¿” 
+     * 其实是 UTF-8 BOM (Byte Order Mark)
+     * 字节顺序标记 EF BB BF
+     * 在以 UTF-8 编码时看不见
+     * 在读入后被 ECHO 到输出中了
+     */
+    /* flex acts as though there is a default rule
+     * at the end of the scanner that copies
+     * otherwise unmatched input to yyout. */
+.               {}
 %%
-int main(int argc, char *argv[])
-{
-if(argc > 1)
-    {
-        if(!(yyin = fopen(argv[1], "r")))
-        {
-            perror(argv[1]);
-            return (1);
-        }
-    }
-yyout=fopen(argv[2],"w");
-yylex();
-  return 0;
-}
+
 int yywrap()
 {
-return 1;
+    return 1;
 }
 

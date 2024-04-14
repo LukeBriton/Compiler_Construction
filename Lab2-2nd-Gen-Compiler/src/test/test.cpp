@@ -8,13 +8,26 @@
 #include <vector>
 #include <string.h>
 #include <map>
+#include "defs.h"
 using namespace std;
 
-// 定义Token结构体
-struct Token {
-    string type;
-    string value;
-};
+std::vector<Token> TokenVector;
+
+void TokenIn(const std::string& a, const std::string& b)
+{
+    TokenVector.push_back(Token(a, b));
+}
+
+void Preamble()
+{
+    cout<<".data"<<endl;
+    cout<<"newline: .asciiz \"\\n\" # 定义一个字符串， 用于输出换行。"<<endl;
+    cout<<".text"<<endl;
+    cout<<".globl main # 声明 main 函数为全局符号，使得模拟器能识别程序的入口点"<<endl;
+    cout<<"main:"<<endl;
+    cout<<"move $fp, $sp # 设置帧指针"<<endl;
+    cout<<"addiu $sp, $sp, -0x100 # 为局部变量分配栈空间"<<endl<<endl;
+}
 
 //IDs按声明顺序记录每个变量
 //ID_Number 变量个数
@@ -39,6 +52,13 @@ int getPrecedence(string& op){
     if(op == "+" || op == "-") return 6;
     if(op == "*" || op == "/" || op == "%") return 7;
     return 0;
+}
+
+int isoperator(string& op){
+    if(op == "+" || op == "-" || op == "*" || op == "/" || op == "%" || op == ">" || op == ">=" || op == "<" || op == "<=" || op == "==" || op == "!="|| op=="&" || op=="|"||op=="^")
+        return 1;
+    else
+        return 0;
 }
 
 //将复杂赋值语句中“=”后面的表达式转化为后缀表达式
@@ -87,22 +107,35 @@ void Process_Declaration(string& ID){
 
 //处理println_int语句
 //简单，找到要打印的那个变量是第几个声明的就行了
-void Process_Println(string& ID){
-    //cout<<"print "<<ID<<endl; 
-    int index = find(IDs.begin(), IDs.end(), ID) - IDs.begin();
-    cout<<"lw $a0, "<<-4*(index + 1)<<"(&fp)"<<endl;
+void Process_Println(const Token& token){
+    //cout<<"//print "<<token.value<<endl; 
+    //打印的是数字
+    if(token.type == "CONSTANT")
+        cout<<"li $a0, "<<token.value<<endl;
+    //打印的是变量
+    if(token.type == "ID")
+    {
+        int index = find(IDs.begin(), IDs.end(), token.value) - IDs.begin();
+        cout<<"lw $a0, "<<-4*(index + 1)<<"($fp)"<<endl; // 幽默，($fp)写成了(&fp)进而全WA，修改后2分。
+    }
     cout<<"li $v0, 1"<<endl;
     cout<<"syscall"<<endl;
     cout<<"li $v0, 4"<<endl;
     cout<<"la $a0, newline"<<endl;
-    cout<<"syscall"<<endl;    
-};
+    cout<<"syscall"<<endl;
+}
 
 //处理return语句
 //永远是return 0，直接抄
-void Process_Return(){
+void Process_Return(const Token& token){
     //cout<<"return 0"<<endl;
-    cout<<"li $v0, 0"<<endl;
+    if(token.type == "CONSTANT")
+        cout<<"li $v0, "<<token.value<<endl;
+    if(token.type == "ID")
+    {
+        int index = find(IDs.begin(), IDs.end(), token.value) - IDs.begin();
+        cout<<"lw $v0, "<<-4*(index + 1)<<"($fp)"<<endl; // li -> lw
+    }
     cout<<"move $v1, $v0"<<endl;
     cout<<"li $v0, 10"<<endl;
     cout<<"syscall"<<endl;
@@ -115,20 +148,27 @@ void Process_Assignment(vector<Token>& assignment){
     //}
     //cout<<endl;
 
-    //统计赋值语句中变量的个数
-    int id_count = 0;
+    //统计赋值语句中操作符的个数(不包括=和())
+    int op_count = 0;
     for(vector<Token>::iterator it = assignment.begin(); it != assignment.end(); it++){
-        if ((*it).type == "ID") id_count++;
+        if (isoperator((*it).value)) op_count++;
     }
 
-    //如果只有一个变量，则赋值语句是形如a = 5的
-    //找到变量是第几个声明的，然后提取出数字即可
-    if(id_count == 1){
-        //寻找变量的index
+    //如果没有操作符，则赋值语句是形如a = 5或者形如a = b的
+    if(op_count == 0){
+        //寻找要赋值变量的index
         int index = find(IDs.begin(), IDs.end(), assignment[0].value) - IDs.begin();
-        //提取数字
-        string number = assignment[2].value;
-        cout<<"li $v0, " + number<<endl;
+        //赋值的值是数字
+        if(assignment[2].type == "CONSTANT"){
+            //提取数字
+            string number = assignment[2].value;
+            cout<<"li $v0, " + number<<endl;
+        }
+        //赋值的值是变量
+        else{
+            int index1 = find(IDs.begin(), IDs.end(), assignment[2].value) - IDs.begin();
+            cout<<"lw $v0, "<<-4*(index1 + 1)<<"($fp)"<<endl;
+        }
         cout<<"sw $v0, 0($sp)"<<endl;
         cout<<"addiu $sp, $sp, -4"<<endl;
         cout<<"lw $v0, 4($sp)"<<endl;
@@ -181,7 +221,7 @@ void Process_Assignment(vector<Token>& assignment){
                     
                 } 
                 else if(token2.type == "CONSTANT"){
-                    cout<<"li $t"<<regnum<<", "<<token1.value<<endl;
+                    cout<<"li $t"<<regnum<<", "<<token2.value<<endl; // 敲成token1了之前
                     map[token2.value] = "$t" + to_string(regnum);
                     update_regnum();
                 }
@@ -194,8 +234,8 @@ void Process_Assignment(vector<Token>& assignment){
                 if(op == "*") cout<<"mul $t"<<regnum<<", "<<map[token2.value]<<", "<<map[token1.value]<<endl;
                 if(op == "/") cout<<"div $t"<<regnum<<", "<<map[token2.value]<<", "<<map[token1.value]<<endl;
                 if(op == "%"){
-                    cout<<"div "<<map[token2.value]<<", "<<map[token1.value]<<endl;
-                    cout<<"add $t"<<regnum<<" $zero, $hi"<<endl;
+                    cout<<"div "<<map[token2.value]<<", "<<map[token1.value]<<endl; // 运算数顺序并没有错
+                    cout<<"mfhi $t"<<regnum<<endl; // 忘加逗号 // 现在不需要逗号了，因为%hi的特殊性，只能用mfhi
                 } 
                 if(op == "&") cout<<"and $t"<<regnum<<", "<<map[token2.value]<<", "<<map[token1.value]<<endl;
                 if(op == "|") cout<<"or $t"<<regnum<<", "<<map[token2.value]<<", "<<map[token1.value]<<endl;
@@ -204,18 +244,20 @@ void Process_Assignment(vector<Token>& assignment){
                     cout<<"xor $t"<<regnum<<", "<<map[token2.value]<<", "<<map[token1.value]<<endl;
                     cout<<"sltiu $t"<<regnum<<", "<<"$t"<<regnum<<", "<<"1"<<endl;
                 }
-                if(op == "!="){
-                    cout<<"xor $t"<<regnum<<", "<<map[token2.value]<<", "<<map[token1.value]<<endl;
-                    cout<<"sltiu $t"<<regnum<<", $zero, $t"<<regnum<<endl;
+                if(op == "!="){// 改完之后9分
+                    cout<<"slt $t"<<regnum<<", "<<map[token2.value]<<", "<<map[token1.value]<<endl;
+                    update_regnum();
+                    cout<<"slt $t"<<regnum<<", "<<map[token1.value]<<", "<<map[token2.value]<<endl;
+                    cout<<"or $t"<<regnum<<", "<<"$t"<<regnum<<", "<<"$t"<<regnum-1<<endl;
                 }
                 if(op == "<") cout<<"slt $t"<<regnum<<", "<<map[token2.value]<<", "<<map[token1.value]<<endl;
-                if(op == "<="){
-                    cout<<"slt $t"<<regnum<<", "<<map[token2.value]<<", "<<map[token1.value]<<endl;
+                if(op == "<="){// 之前顺序 "<=" 和 ">=" 搞混了
+                    cout<<"slt $t"<<regnum<<", "<<map[token1.value]<<", "<<map[token2.value]<<endl;
                     cout<<"xori $t"<<regnum<<", "<<"$t"<<regnum<<", "<<"1"<<endl;
-                }
+                } 
                 if(op == ">") cout<<"slt $t"<<regnum<<", "<<map[token1.value]<<", "<<map[token2.value]<<endl;
                 if(op == ">="){
-                    cout<<"slt $t"<<regnum<<", "<<map[token1.value]<<", "<<map[token2.value]<<endl;
+                    cout<<"slt $t"<<regnum<<", "<<map[token2.value]<<", "<<map[token1.value]<<endl;
                     cout<<"xori $t"<<regnum<<", "<<"$t"<<regnum<<", "<<"1"<<endl;
                 }
                 //结果入栈 实际上是存放结果的寄存器入栈
@@ -227,7 +269,7 @@ void Process_Assignment(vector<Token>& assignment){
         }
         //栈顶即是最后的结果，将其赋值给要赋值的那个变量
         int index = find(IDs.begin(), IDs.end(), assignment[0].value) - IDs.begin();
-        cout<<"lw $v0, " + stack.top().value<<endl;
+        cout<<"move $v0, " + stack.top().value<<endl; // 之前用成了lw，修改后7分。
         cout<<"sw $v0, 0($sp)"<<endl;
         cout<<"addiu $sp, $sp, -4"<<endl;
         cout<<"lw $v0, 4($sp)"<<endl;
@@ -244,47 +286,31 @@ void Process_Assignment(vector<Token>& assignment){
 
 int main(int argc, char *argv[]) {
     //打开词法分析结果，词法分析输出格式Type:Value
-    ifstream file;
-    if(argc>1){
-        file.open(argv[1]);
+
+    if(argc > 1)
+    {
+        if(!(yyin = fopen(argv[1], "r")))
+        {
+            perror(argv[1]);
+            return (1);
+        }
     }
-    else file.open("out1.txt");
-
-    string line;
-    vector<Token> TokenVector;  // 创建一个vector来存储Token结构体
-
-    /*如果能将flex和该文件合在一起的话，直接将分析出来的每个Token push_back到TokenVector中即可，就不用读文件了*/
-    // 逐行读取文件内容
-    while (getline(file, line)) {
-        istringstream iss(line);
-        string firstPart, secondPart;
-
-        // 获取第一个字符串
-        if (!getline(iss, firstPart, ':')) continue;
-
-        // 获取第二个字符串
-        if (!getline(iss, secondPart)) continue;
-
-        // 创建Token结构体并存放在vector中
-        Token token = {firstPart, secondPart};
-
-        TokenVector.push_back(token);
-    }
-
-    file.close();  // 关闭文件
-
+    yylex();
+    Preamble();
     //依次读取每个token
     for(vector<Token>::iterator it = TokenVector.begin(); it != TokenVector.end(); it++){
             //cout<<(*it).type<<":"<<(*it).value<<endl;
+
+            //处理int main(int argv, int argc)
 
             //处理int声明语句，关键在int后面的那个标识符
             if((*it).value == "int" && (*(it+1)).value != "main") Process_Declaration((*(it+1)).value);
 
             //处理return语句
-            if((*it).value == "return") Process_Return();
+            if((*it).value == "return") Process_Return((*(it+1)));
 
-            //处理println_int语句，关键在println_int括号中的标识符
-            if((*it).value == "println_int") Process_Println((*(it+2)).value);
+            //处理println_int语句，关键在println_int括号中的标识符或者数字
+            if((*it).value == "println_int") Process_Println((*(it+2)));
 
             //处理赋值语句，对整句赋值语句进行分析
             if((*it).value == "="){
