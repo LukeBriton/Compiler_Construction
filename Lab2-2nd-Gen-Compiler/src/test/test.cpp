@@ -157,14 +157,14 @@ void Process_Assignment(vector<Token>& assignment){
                 //变量 lw出来
                 if(token1.type == "ID"){
                     int index = find(IDs.begin(), IDs.end(), token1.value) - IDs.begin();
-                    cout<<"lw $t"<<regnum<<" "<<-4*(index + 1)<<"($fp)"<<endl;
+                    cout<<"lw $t"<<regnum<<", "<<-4*(index + 1)<<"($fp)"<<endl;
                     map[token1.value] = "$t" + to_string(regnum);
                     update_regnum();
                     
                 } 
                 //数字 li出来
                 else if(token1.type == "CONSTANT"){
-                    cout<<"li $t"<<regnum<<" "<<token1.value<<endl;
+                    cout<<"li $t"<<regnum<<", "<<token1.value<<endl;
                     map[token1.value] = "$t" + to_string(regnum);
                     update_regnum();
                 }
@@ -175,13 +175,13 @@ void Process_Assignment(vector<Token>& assignment){
                 Token token2 = stack.top();stack.pop();
                 if(token2.type == "ID"){
                     int index = find(IDs.begin(), IDs.end(), token2.value) - IDs.begin();
-                    cout<<"lw $t"<<regnum<<" "<<-4*(index + 1)<<"($fp)"<<endl;
+                    cout<<"lw $t"<<regnum<<", "<<-4*(index + 1)<<"($fp)"<<endl;
                     map[token2.value] = "$t" + to_string(regnum);
                     update_regnum();
                     
                 } 
                 else if(token2.type == "CONSTANT"){
-                    cout<<"li $t"<<regnum<<" "<<token1.value<<endl;
+                    cout<<"li $t"<<regnum<<", "<<token1.value<<endl;
                     map[token2.value] = "$t" + to_string(regnum);
                     update_regnum();
                 }
