@@ -33,7 +33,7 @@ void Preamble()
 //ID_Number 变量个数
 vector<string> IDs;
 int ID_Number = 0;
-int TempID=0;
+int TempID=0; // 存放栈内的中间变量个数
 //regnum 当前可用的存放临时变量的寄存器号，MIPS中有t0-t9共十个
 //update_regnum 用了一个寄存器后就让寄存器号+1，用到了最后一个t9则重新回去用t0
 //int regnum = 0;
@@ -129,7 +129,7 @@ void Process_Println(const Token& token){
 //永远是return 0，直接抄
 void Process_Return(const Token& token){
     //cout<<"return 0"<<endl;
-    cout<<"addi $sp, $sp, "<<4*TempID<<endl;
+    //cout<<"addi $sp, $sp, "<<4*TempID<<endl;
     if(token.type == "CONSTANT")
         cout<<"li $v0, "<<token.value<<endl;
     if(token.type == "ID")
@@ -194,41 +194,48 @@ void Process_Assignment(vector<Token> assignment){
             if((*it).type == "ID" || (*it).type == "CONSTANT") stack.push(*it);
             //如果是操作符，从栈中提取两个操作数进行运算
             else{
-                //操作数1 token1 放在t0中
+
                 Token token1 = stack.top();stack.pop();
+                Token token2 = stack.top();stack.pop();
+                int offset = 0; // 给存放到栈内的中间变量分配的空间
+                offset = 4 * ((token1.type == "TempID") + (token2.type == "TempID"));
+
+                //操作数1 token1 放在t0中
+
                 //变量 lw出来
                 if(token1.type == "ID"){
                     int index = find(IDs.begin(), IDs.end(), token1.value) - IDs.begin();
                     cout<<"lw $t0, "<<-4*(index + 1)<<"($fp)"<<endl;
-                    //map[token1.value] = "$t0";
-                    //update_regnum();
-                    
                 } 
                 //数字 li出来
                 else if(token1.type == "CONSTANT"){
                     cout<<"li $t0, "<<token1.value<<endl;
-                    //map[token1.value] = "$t0";
-                    //update_regnum();
                 }
                 //临时变量
                 else{
-                    int index = atoi((token1.value.substr(1)).c_str());
-                    cout<<"lw $t0, "<<4*(TempID-1-index)<<"($sp)"<<endl;
+                    //int index = atoi((token1.value.substr(1)).c_str());
+                    //cout<<"lw $t0, "<<4*(TempID-1-index)<<"($sp)"<<endl;
+                    cout<<"lw $t0, 0($sp)"<<endl;
                 }
 
                 //操作数2 token2 放在t1中
-                Token token2 = stack.top();stack.pop();
+                
                 if(token2.type == "ID"){
                     int index = find(IDs.begin(), IDs.end(), token2.value) - IDs.begin();
                     cout<<"lw $t1, "<<-4*(index + 1)<<"($fp)"<<endl;
                 } 
                 else if(token2.type == "CONSTANT"){
-                     cout<<"li $t1, "<<token2.value<<endl;
+                    cout<<"li $t1, "<<token2.value<<endl;
                 }
                 else{
-                    int index = atoi((token2.value.substr(1)).c_str());
-                    cout<<"lw $t1, "<<4*(TempID-1-index)<<"($sp)"<<endl;
+                    //int index = atoi((token2.value.substr(1)).c_str());
+                    //cout<<"lw $t1, "<<4*(TempID-1-index)<<"($sp)"<<endl;
+                    if(offset == 4)
+                        cout<<"lw $t1, 0($sp)"<<endl;
+                    else if(offset == 8)
+                        cout<<"lw $t1, 4($sp)"<<endl;
                 }
+
                 //运算符op
                 string op = (*it).value;
                 //计算token2 op token1
@@ -262,12 +269,21 @@ void Process_Assignment(vector<Token> assignment){
                     cout<<"slt $t2, $t1, $t0"<<endl;
                     cout<<"xori $t2, $t2, 1"<<endl;
                 }
+
+                if(offset)
+                {
+                    cout<<"addiu $sp, $sp, "<<offset<<endl;
+                    TempID -= offset/4;
+                }
+                //cout << TempID << endl;
                 //中间结果因此命名为ai(i=0,1,2,...)，存入内存sp-4*i处
-                cout<<"addi $sp, $sp, -4"<<endl;
+                TempID ++;
+                cout<<"addiu $sp, $sp, -4"<<endl;
                 cout<<"sw $t2, 0($sp)"<<endl;
                 //结果入栈 实际上是存放中间结果的中间变量入栈
-                Token result = {"TempID", "a" + to_string(TempID)};
-                TempID++;
+                Token result = {"TempID", "Temp" + to_string(TempID)};
+                //Token result = {"TempID", "a" + to_string(TempID)};
+                //TempID++;
                 //map[result.value] = "$t" + to_string(regnum);
                 stack.push(result);
                 //update_regnum();
@@ -275,10 +291,21 @@ void Process_Assignment(vector<Token> assignment){
         }
 //栈顶即是最后的结果，将其赋值给要赋值的那个变量
         int index = find(IDs.begin(), IDs.end(), assignment[0].value) - IDs.begin();
-        int index1 = atoi((stack.top().value.substr(1)).c_str());
-        cout<<"lw $v0, "<<4*(TempID-1-index1)<<"($sp)"<<endl;
+        //int index1 = atoi((stack.top().value.substr(1)).c_str());
+        //cout<<"lw $v0, "<<4*(TempID-1-index1)<<"($sp)"<<endl;
+        cout<<"lw $v0, 0($sp)"<<endl;
+        //cout<<"addiu $sp, $sp, 4"<<endl;//不要加这句，留待以后再改吧。
+        TempID--;
+        //cout << TempID <<endl;
         //cout<<"move $v0, " + stack.top().value<<endl;
-        cout<<"sw $v0, 0($sp)"<<endl;
+        //cout<<"sw $v0, 0($sp)"<<endl;
+        /*
+         * Despite its name, add immediate unsigned (addiu) is used
+         * to add constants to signed integers when we don't care about
+         * overflow. MIPS has no subtract immediate instruction, and
+         * negative numbers need sign extension, so the MIPS architects 
+         * decided to sign-extend the immediate field.
+         */
         cout<<"addiu $sp, $sp, -4"<<endl;
         cout<<"lw $v0, 4($sp)"<<endl;
         cout<<"sw $v0, "<<-4*(index + 1)<<"($fp)"<<endl;
