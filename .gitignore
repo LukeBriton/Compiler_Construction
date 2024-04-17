@@ -1,5 +1,7 @@
 Lab1-1st-Gen-Compiler/src/Flex_Bison/
 
+**/build/
+
 # Prerequisites
 *.d
 
