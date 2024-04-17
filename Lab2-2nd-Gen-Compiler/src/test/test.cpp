@@ -39,7 +39,7 @@ int ID_Number = 0;
 int regnum = 0;
 void update_regnum(){
     regnum += 1;
-    if(regnum ==10) regnum=0;
+    regnum %= 10;
 }
 
 //运算符的优先级
@@ -217,13 +217,13 @@ void Process_Assignment(vector<Token>& assignment){
                     int index = find(IDs.begin(), IDs.end(), token2.value) - IDs.begin();
                     cout<<"lw $t"<<regnum<<", "<<-4*(index + 1)<<"($fp)"<<endl;
                     map[token2.value] = "$t" + to_string(regnum);
-                    update_regnum();
+                    
                     
                 } 
                 else if(token2.type == "CONSTANT"){
                     cout<<"li $t"<<regnum<<", "<<token2.value<<endl; // 敲成token1了之前
                     map[token2.value] = "$t" + to_string(regnum);
-                    update_regnum();
+                    
                 }
                 else map[token2.value] = token2.value;
                 //运算符op
@@ -245,10 +245,10 @@ void Process_Assignment(vector<Token>& assignment){
                     cout<<"sltiu $t"<<regnum<<", "<<"$t"<<regnum<<", "<<"1"<<endl;
                 }
                 if(op == "!="){// 改完之后9分
-                    cout<<"slt $t"<<regnum<<", "<<map[token2.value]<<", "<<map[token1.value]<<endl;
                     update_regnum();
-                    cout<<"slt $t"<<regnum<<", "<<map[token1.value]<<", "<<map[token2.value]<<endl;
-                    cout<<"or $t"<<regnum<<", "<<"$t"<<regnum<<", "<<"$t"<<regnum-1<<endl;
+                    cout<<"slt $t"<<regnum<<", "<<map[token2.value]<<", "<<map[token1.value]<<endl;
+                    cout<<"slt $t"<<(regnum-1+10)%10<<", "<<map[token1.value]<<", "<<map[token2.value]<<endl;
+                    cout<<"or $t"<<regnum<<", "<<"$t"<<regnum<<", "<<"$t"<<(regnum-1+10)%10<<endl;
                 }
                 if(op == "<") cout<<"slt $t"<<regnum<<", "<<map[token2.value]<<", "<<map[token1.value]<<endl;
                 if(op == "<="){// 之前顺序 "<=" 和 ">=" 搞混了
