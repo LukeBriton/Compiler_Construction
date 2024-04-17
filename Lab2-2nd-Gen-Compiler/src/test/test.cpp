@@ -33,14 +33,14 @@ void Preamble()
 //ID_Number 变量个数
 vector<string> IDs;
 int ID_Number = 0;
-
+int TempID=0;
 //regnum 当前可用的存放临时变量的寄存器号，MIPS中有t0-t9共十个
 //update_regnum 用了一个寄存器后就让寄存器号+1，用到了最后一个t9则重新回去用t0
-int regnum = 0;
-void update_regnum(){
-    regnum += 1;
-    regnum %= 10;
-}
+//int regnum = 0;
+//void update_regnum(){
+//    regnum += 1;
+//    regnum %= 10;
+//}
 
 //运算符的优先级
 int getPrecedence(string& op){
@@ -129,6 +129,7 @@ void Process_Println(const Token& token){
 //永远是return 0，直接抄
 void Process_Return(const Token& token){
     //cout<<"return 0"<<endl;
+    cout<<"addi $sp, $sp, "<<4*TempID<<endl;
     if(token.type == "CONSTANT")
         cout<<"li $v0, "<<token.value<<endl;
     if(token.type == "ID")
@@ -142,7 +143,8 @@ void Process_Return(const Token& token){
 };
 
 //处理赋值语句
-void Process_Assignment(vector<Token>& assignment){
+void Process_Assignment(vector<Token> assignment){
+    //cout<<"//";
     //for(vector<Token>::iterator it = assignment.begin(); it != assignment.end(); it++){
     //    cout<<(*it).value<<" ";
     //}
@@ -192,92 +194,95 @@ void Process_Assignment(vector<Token>& assignment){
             if((*it).type == "ID" || (*it).type == "CONSTANT") stack.push(*it);
             //如果是操作符，从栈中提取两个操作数进行运算
             else{
-                //操作数1 token1
+                //操作数1 token1 放在t0中
                 Token token1 = stack.top();stack.pop();
                 //变量 lw出来
                 if(token1.type == "ID"){
                     int index = find(IDs.begin(), IDs.end(), token1.value) - IDs.begin();
-                    cout<<"lw $t"<<regnum<<", "<<-4*(index + 1)<<"($fp)"<<endl;
-                    map[token1.value] = "$t" + to_string(regnum);
-                    update_regnum();
+                    cout<<"lw $t0, "<<-4*(index + 1)<<"($fp)"<<endl;
+                    //map[token1.value] = "$t0";
+                    //update_regnum();
                     
                 } 
                 //数字 li出来
                 else if(token1.type == "CONSTANT"){
-                    cout<<"li $t"<<regnum<<", "<<token1.value<<endl;
-                    map[token1.value] = "$t" + to_string(regnum);
-                    update_regnum();
+                    cout<<"li $t0, "<<token1.value<<endl;
+                    //map[token1.value] = "$t0";
+                    //update_regnum();
                 }
-                //临时寄存器
-                else map[token1.value]=token1.value;
+                //临时变量
+                else{
+                    int index = atoi((token1.value.substr(1)).c_str());
+                    cout<<"lw $t0, "<<4*(TempID-1-index)<<"($sp)"<<endl;
+                }
 
-                //操作数2 token2
+                //操作数2 token2 放在t1中
                 Token token2 = stack.top();stack.pop();
                 if(token2.type == "ID"){
                     int index = find(IDs.begin(), IDs.end(), token2.value) - IDs.begin();
-                    cout<<"lw $t"<<regnum<<", "<<-4*(index + 1)<<"($fp)"<<endl;
-                    map[token2.value] = "$t" + to_string(regnum);
-                    
-                    
+                    cout<<"lw $t1, "<<-4*(index + 1)<<"($fp)"<<endl;
                 } 
                 else if(token2.type == "CONSTANT"){
-                    cout<<"li $t"<<regnum<<", "<<token2.value<<endl; // 敲成token1了之前
-                    map[token2.value] = "$t" + to_string(regnum);
-                    
+                     cout<<"li $t1, "<<token2.value<<endl;
                 }
-                else map[token2.value] = token2.value;
+                else{
+                    int index = atoi((token2.value.substr(1)).c_str());
+                    cout<<"lw $t1, "<<4*(TempID-1-index)<<"($sp)"<<endl;
+                }
                 //运算符op
                 string op = (*it).value;
                 //计算token2 op token1
-                if(op == "+") cout<<"add $t"<<regnum<<", "<<map[token2.value]<<", "<<map[token1.value]<<endl;
-                if(op == "-") cout<<"sub $t"<<regnum<<", "<<map[token2.value]<<", "<<map[token1.value]<<endl;
-                if(op == "*") cout<<"mul $t"<<regnum<<", "<<map[token2.value]<<", "<<map[token1.value]<<endl;
-                if(op == "/") cout<<"div $t"<<regnum<<", "<<map[token2.value]<<", "<<map[token1.value]<<endl;
+                if(op == "+") cout<<"add $t2, $t1, $t0"<<endl;
+                if(op == "-") cout<<"sub $t2, $t1, $t0"<<endl;
+                if(op == "*") cout<<"mul $t2, $t1, $t0"<<endl;
+                if(op == "/") cout<<"div $t2, $t1, $t0"<<endl;
                 if(op == "%"){
-                    cout<<"div "<<map[token2.value]<<", "<<map[token1.value]<<endl; // 运算数顺序并没有错
-                    cout<<"mfhi $t"<<regnum<<endl; // 忘加逗号 // 现在不需要逗号了，因为%hi的特殊性，只能用mfhi
+                    cout<<"div $t1, $t0"<<endl;
+                    cout<<"mfhi $t2"<<endl;
                 } 
-                if(op == "&") cout<<"and $t"<<regnum<<", "<<map[token2.value]<<", "<<map[token1.value]<<endl;
-                if(op == "|") cout<<"or $t"<<regnum<<", "<<map[token2.value]<<", "<<map[token1.value]<<endl;
-                if(op == "^") cout<<"xor $t"<<regnum<<", "<<map[token2.value]<<", "<<map[token1.value]<<endl;
+                if(op == "&") cout<<"and $t2, $t1, $t0"<<endl;
+                if(op == "|") cout<<"or $t2, $t1, $t0"<<endl;
+                if(op == "^") cout<<"xor $t2, $t1, $t0"<<endl;
                 if(op == "=="){
-                    cout<<"xor $t"<<regnum<<", "<<map[token2.value]<<", "<<map[token1.value]<<endl;
-                    cout<<"sltiu $t"<<regnum<<", "<<"$t"<<regnum<<", "<<"1"<<endl;
+                    cout<<"xor $t2, $t1, $t0"<<endl;
+                    cout<<"sltiu $t2, $t2, 1"<<endl;
                 }
-                if(op == "!="){// 改完之后9分
-                    update_regnum();
-                    cout<<"slt $t"<<regnum<<", "<<map[token2.value]<<", "<<map[token1.value]<<endl;
-                    cout<<"slt $t"<<(regnum-1+10)%10<<", "<<map[token1.value]<<", "<<map[token2.value]<<endl;
-                    cout<<"or $t"<<regnum<<", "<<"$t"<<regnum<<", "<<"$t"<<(regnum-1+10)%10<<endl;
+                if(op == "!="){
+                    cout<<"slt $t2, $t1, $t0"<<endl;
+                    cout<<"slt $t0, $t0, $t1"<<endl;
+                    cout<<"or $t2, $t0, $t2"<<endl;
                 }
-                if(op == "<") cout<<"slt $t"<<regnum<<", "<<map[token2.value]<<", "<<map[token1.value]<<endl;
-                if(op == "<="){// 之前顺序 "<=" 和 ">=" 搞混了
-                    cout<<"slt $t"<<regnum<<", "<<map[token1.value]<<", "<<map[token2.value]<<endl;
-                    cout<<"xori $t"<<regnum<<", "<<"$t"<<regnum<<", "<<"1"<<endl;
-                } 
-                if(op == ">") cout<<"slt $t"<<regnum<<", "<<map[token1.value]<<", "<<map[token2.value]<<endl;
+                if(op == "<") cout<<"slt $t2, $t1, $t0"<<endl;
+                if(op == "<="){
+                    cout<<"slt $t2, $t0, $t1"<<endl;
+                    cout<<"xori $t2, $t2, 1"<<endl;
+                }
+                if(op == ">") cout<<"slt $t2, $t0, $t1"<<endl;
                 if(op == ">="){
-                    cout<<"slt $t"<<regnum<<", "<<map[token2.value]<<", "<<map[token1.value]<<endl;
-                    cout<<"xori $t"<<regnum<<", "<<"$t"<<regnum<<", "<<"1"<<endl;
+                    cout<<"slt $t2, $t1, $t0"<<endl;
+                    cout<<"xori $t2, $t2, 1"<<endl;
                 }
-                //结果入栈 实际上是存放结果的寄存器入栈
-                Token result = {"REG", "$t" + to_string(regnum)};
-                map[result.value] = "$t" + to_string(regnum);
+                //中间结果因此命名为ai(i=0,1,2,...)，存入内存sp-4*i处
+                cout<<"addi $sp, $sp, -4"<<endl;
+                cout<<"sw $t2, 0($sp)"<<endl;
+                //结果入栈 实际上是存放中间结果的中间变量入栈
+                Token result = {"TempID", "a" + to_string(TempID)};
+                TempID++;
+                //map[result.value] = "$t" + to_string(regnum);
                 stack.push(result);
-                update_regnum();
+                //update_regnum();
             }
         }
-        //栈顶即是最后的结果，将其赋值给要赋值的那个变量
+//栈顶即是最后的结果，将其赋值给要赋值的那个变量
         int index = find(IDs.begin(), IDs.end(), assignment[0].value) - IDs.begin();
-        cout<<"move $v0, " + stack.top().value<<endl; // 之前用成了lw，修改后7分。
+        int index1 = atoi((stack.top().value.substr(1)).c_str());
+        cout<<"lw $v0, "<<4*(TempID-1-index1)<<"($sp)"<<endl;
+        //cout<<"move $v0, " + stack.top().value<<endl;
         cout<<"sw $v0, 0($sp)"<<endl;
         cout<<"addiu $sp, $sp, -4"<<endl;
         cout<<"lw $v0, 4($sp)"<<endl;
         cout<<"sw $v0, "<<-4*(index + 1)<<"($fp)"<<endl;
         cout<<"addiu $sp, $sp, 4"<<endl;
-
-
-    
     } 
     
 
