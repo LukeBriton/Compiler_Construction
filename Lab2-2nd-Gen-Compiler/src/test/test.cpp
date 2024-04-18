@@ -32,7 +32,7 @@ void Preamble()
 //IDs按声明顺序记录每个变量
 //ID_Number 变量个数
 vector<string> IDs;
-int ID_Number = 0;
+//int ID_Number = 0;
 int TempID=0; // 存放栈内的中间变量个数
 //regnum 当前可用的存放临时变量的寄存器号，MIPS中有t0-t9共十个
 //update_regnum 用了一个寄存器后就让寄存器号+1，用到了最后一个t9则重新回去用t0
@@ -102,7 +102,7 @@ vector<Token> Infix2Suffix(vector<Token>& assignment){
 void Process_Declaration(string& ID){
     //cout<<"int"<<ID<<endl;
     IDs.push_back(ID);
-    ID_Number++;
+    //ID_Number++;
 }
 
 //处理println_int语句
