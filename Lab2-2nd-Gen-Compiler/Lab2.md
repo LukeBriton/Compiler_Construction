@@ -321,6 +321,42 @@ because this will match each of the six bytes 0xe8, 0x82, 0x96, 0xe6, 0x99 and 0
 
 [Flex(lexer) support for unicode](https://stackoverflow.com/questions/9611682/flexlexer-support-for-unicode)
 
+### rule cannot be matched
+
+误将顺序放成如下形式：
+```C
+[_[:alpha:]][_[:alnum:]]*     {
+                    //chars += yyleng;
+                    //printf("Identifier\n");
+                    return ID;
+                }
+
+...
+
+"println_int" { yylval.fn = B\_println\_int; return FUNC; } /\* MyFlex.l:116: warning, rule cannot be matched \*/
+```
+
+则下面的规则不可能被匹配到。
+
+参考：[Getting: warning, rule cannot be matched](https://stackoverflow.com/questions/15057399/getting-warning-rule-cannot-be-matched)
+
+### Flex Scanner Output[^nod]
+
+Harking back to the earliest versions of lex, unless you tell it otherwise, flex acts as though there is a default rule at the end of the scanner that copies otherwise unmatched input to `yyout`.
+
+```C
+. ECHO;
+#define ECHO fwrite( yytext, yyleng, 1, yyout )
+```
+
+in general it is more likely to be a source of bugs than to be useful. Flex lets you say `%option nodefault` at the top of the scanner to tell it not to add a default rule and rather to report an error if the input rules don’t cover all possible input. I recommend that scanners always use `nodefault` and include their own default rule if one is needed.
+
+### [How do I use C++ in flex and bison?](https://stackoverflow.com/questions/778431/how-do-i-use-c-in-flex-and-bison)[](https://stackoverflow.com/posts/778531/timeline)
+
+You don't need to do anything with flex or bison to use C++, I have done it many times. You just have to make sure you use g++, not gcc.
+
+不过根据 lab2 的经验，要是 .l 文件调用了 C++ 相关的函数，需要将 Flex 生成的 lex.yy.c 改后缀名为 .cpp，以在参与编译时使用之。
+
 ## Parser(Syntactic Analysis, 句法分析)[^par]
 
 ### [Symbols](https://www.gnu.org/software/bison/manual/html_node/Symbols.html)
@@ -340,7 +376,7 @@ So a symbolic link is one more file, just as a `README.md` or a `Makefile`. Git 
 
 https://stackoverflow.com/questions/954560/how-does-git-handle-symbolic-links
 
-### OPs
+### OPs & shift/reduce conflicts
 
 Bison assigns each rule the precedence of the rightmost token on the righthand side; if that token has no precedence assigned, the rule has no precedence of its own. When bison encounters a shift/reduce conflict, it consults the table of precedence, and if all the rules involved in the conflict have a precedence assigned, it uses precedence\
 to resolve the conflict.
@@ -350,6 +386,24 @@ Bison为每条规则分配了右侧最右边标记的优先级；如果该标记
 ![op_precedence.png](./img/op_precedence.png "op_precedence.png")
 
 ![op_associativity.png](./img/op_associativity.png)[^op_p&a]
+
+起初没有将算符的优先级列全：
+```C
+%nonassoc <fn> CMP
+%right '='
+%left '+' '-'
+%left '*' '/'
+%nonassoc UMINUS
+```
+
+这时会报错：
+```Bash
+C:\Users\dell\Documents\GitHub\Compiler_Construction\Lab2-2nd-Gen-Compiler\src\Flex_Bison>win_bison -d MyBison.y
+MyBison.y: warning: 13 shift/reduce conflicts [-Wconflicts-sr]
+MyBison.y: note: rerun with option '-Wcounterexamples' to generate conflict counterexamples
+```
+
+参考：[Where are the shift/reduce conflicts in this Bison code coming from?](https://stackoverflow.com/questions/3264884/where-are-the-shift-reduce-conflicts-in-this-bison-code-coming-from)
 
 ## Elaborator(Semantic Analysis, 语义分析)[^ela]
 
@@ -495,6 +549,7 @@ https://github.com/JuliaHubOSS/llvm-cbe
 [^quo]: [flex & bison](https://web.iitd.ac.in/~sumeet/flex__bison.pdf) P20
 [^sta]: [flex & bison](https://web.iitd.ac.in/~sumeet/flex__bison.pdf) P28 P136
 [^sub]: [flex & bison](https://web.iitd.ac.in/~sumeet/flex__bison.pdf) P122
+[^nod]: [flex & bison](https://web.iitd.ac.in/~sumeet/flex__bison.pdf) P27
 [^par]: 颇多用 syntax 修饰的，还有叫 Grammar Analysis 的, 讲道理 grammar 才是该译作“语法/文法”的。
 [^op]: [flex & bison](https://web.iitd.ac.in/~sumeet/flex__bison.pdf) P60
 [^op_p&a]: [Flex and Bison Tutorial](https://www.capsl.udel.edu/courses/cpeg421/2012/slides/Tutorial-Flex_Bison.pdf) P44, 45
