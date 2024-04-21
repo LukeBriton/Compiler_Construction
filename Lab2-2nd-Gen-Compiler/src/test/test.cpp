@@ -225,7 +225,7 @@ void Process_Assignment(vector<Token> assignment){
                     cout<<"lw $t1, "<<-4*(index + 1)<<"($fp)"<<endl;
                 } 
                 else if(token2.type == "CONSTANT"){
-                    cout<<"li $t1, "<<token2.value<<endl;
+                    cout<<"li $t1, "<<token2.value<<endl; // 敲成token1了之前
                 }
                 else{
                     //int index = atoi((token2.value.substr(1)).c_str());
@@ -244,8 +244,8 @@ void Process_Assignment(vector<Token> assignment){
                 if(op == "*") cout<<"mul $t2, $t1, $t0"<<endl;
                 if(op == "/") cout<<"div $t2, $t1, $t0"<<endl;
                 if(op == "%"){
-                    cout<<"div $t1, $t0"<<endl;
-                    cout<<"mfhi $t2"<<endl;
+                    cout<<"div $t1, $t0"<<endl;  // 运算数顺序并没有错
+                    cout<<"mfhi $t2"<<endl; // 忘加逗号 // 现在不需要逗号了，因为%hi的特殊性，只能用mfhi
                 } 
                 if(op == "&") cout<<"and $t2, $t1, $t0"<<endl;
                 if(op == "|") cout<<"or $t2, $t1, $t0"<<endl;
@@ -254,13 +254,13 @@ void Process_Assignment(vector<Token> assignment){
                     cout<<"xor $t2, $t1, $t0"<<endl;
                     cout<<"sltiu $t2, $t2, 1"<<endl;
                 }
-                if(op == "!="){
+                if(op == "!="){ // （之前仍只用寄存器的时候）改完之后9分
                     cout<<"slt $t2, $t1, $t0"<<endl;
                     cout<<"slt $t0, $t0, $t1"<<endl;
                     cout<<"or $t2, $t0, $t2"<<endl;
                 }
                 if(op == "<") cout<<"slt $t2, $t1, $t0"<<endl;
-                if(op == "<="){
+                if(op == "<="){ // 之前顺序 "<=" 和 ">=" 搞混了
                     cout<<"slt $t2, $t0, $t1"<<endl;
                     cout<<"xori $t2, $t2, 1"<<endl;
                 }
