@@ -60,7 +60,7 @@
     /* declaration keywords */
     /* 怀疑之后有必要统一设为 Type，*/
     /* 依靠 yylval 区分具体类型 */
-"int" {return INT; }
+"int" { return INT; }
 
 
     /* 操作符： =、 +、 -、 *、 / */
@@ -85,12 +85,15 @@
 ";" { return yytext[0]; }
 
     /* comparison ops, all are a CMP token */
-">" { yylval.fn = 1; return CMP; }
-"<" { yylval.fn = 2; return CMP; }
-"!=" { yylval.fn = 3; return CMP; }
-"==" { yylval.fn = 4; return CMP; }
-">=" { yylval.fn = 5; return CMP; }
-"<=" { yylval.fn = 6; return CMP; }
+    /* Higher Precedence */
+">" { yylval.fn = 1; return LGE; }
+"<" { yylval.fn = 2; return LGE; }
+">=" { yylval.fn = 3; return LGE; }
+"<=" { yylval.fn = 4; return LGE; }
+    /* Lower Precedence */
+"!=" { yylval.fn = 5; return EQN; }
+"==" { yylval.fn = 6; return EQN; }
+
 
 
     /* built-in functions */
@@ -114,23 +117,39 @@
     /* https://en.cppreference.com/w/cpp/language/integer_literal */
     /* 以后考虑外加浮点数、非十进制数，乃至字符（串）的处理 */
     /* a.b1() 和 1.4 */
+
     /* C99 decimal constant */
     /* The ‘{-}’ operator computes the difference of two character classes.
     The ‘{-}’ operator is left associative */
-([[:digit:]]{-}[0])[[:digit:]]*    {
+    /* 这个愚蠢的东西不包括 0 */
+    /* 在 C 语言 为 octal-constant */
+    /* 在 C++ 为 octal-literal */
+    /* https://stackoverflow.com/questions/26625311/is-0-an-octal-or-a-decimal-in-c */
+    /* https://stackoverflow.com/questions/6895522/is-0-a-decimal-literal-or-an-octal-literal */
+
+([[:digit:]]{-}[0])[[:digit:]]* |
+0    {
                     //printf("Literal\n");
                     //叫做 NUMBER 是为了方便之后扩展 Parser 中句法。
                     yylval.num = atof(yytext);
                     return NUMBER;
                 }
 
+    /* "//".* */
+[ \t] {/* ignore whitespace */}
+\r\n|\n|\r { /* return CRLF; */ }
 
-"//".*
-[ \t] /* ignore whitespace */
+    /* Again, harking back to the earliest versions of lex,
+     * unless you tell it otherwise, flex acts as though
+     * there is a default rule at the end of the scanner that copies
+     * otherwise unmatched input to yyout. */
 
-\\\n { printf("c> "); } /* ignore line continuation */
-
-\r\n|\n|\r { return CRLF; }
+    /* <<EOF>> related */
+    /* 
+     * https://stackoverflow.com/questions/73767676/flex-cant-handle-eof-in-action-or-how-to
+     * https://stackoverflow.com/questions/23555786/match-eof-but-go-to-endless-loop-in-flex
+     * https://stackoverflow.com/questions/6614834/lex-flex-scanning-for-the-eof-character
+     */
 
 .           { yyerror("Mystery character %c\n", *yytext); }
 %%
