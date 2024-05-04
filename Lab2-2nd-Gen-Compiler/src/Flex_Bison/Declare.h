@@ -6,6 +6,7 @@
  * Calculator that builds an AST: header fb3-1.h
  * Example 3-5.
  * Advanced calculator header fb3-2.h
+ * + acwj/06_Variables
  */
 
 /* interface to the lexer */
@@ -36,7 +37,7 @@ struct symlist *newsymlist(struct symbol *sym, struct symlist *next);
 void symlistfree(struct symlist *sl);
 
 /* node types
- * + - * / |
+ * + - * / % & | ^
  * 0-7 comparison ops, bit coded 04 equal, 02 less, 01 greater
  * M unary minus
  * L expression or statement list
@@ -50,10 +51,7 @@ void symlistfree(struct symlist *sl);
  */
 
 enum bifs { /* built-in functions */
-    B_sqrt = 1,
-    B_exp,
-    B_log,
-    B_print
+    B_println_int = 1
 };
 
 /* nodes in the abstract syntax tree */
@@ -71,18 +69,18 @@ struct fncall { /* built-in function */
     enum bifs functype;
 };
 
-struct ufncall { /* user function */
-    int nodetype; /* type C */
-    struct ast *l; /* list of arguments */
-    struct symbol *s;
-};
+//struct ufncall { /* user function */
+//    int nodetype; /* type C */
+//    struct ast *l; /* list of arguments */
+//    struct symbol *s;
+//};
 
-struct flow {
-    int nodetype; /* type I or W */
-    struct ast *cond; /* condition */
-    struct ast *tl; /* then branch or do list */
-    struct ast *el; /* optional else branch */
-};
+//struct flow {
+//    int nodetype; /* type I or W */
+//    struct ast *cond; /* condition */
+//    struct ast *tl; /* then branch or do list */
+//    struct ast *el; /* optional else branch */
+//};
 
 struct numval {
     int nodetype; /* type K for constant */
@@ -103,18 +101,37 @@ struct symasgn {
 /* build an AST */
 struct ast *newast(int nodetype, struct ast *l, struct ast *r);
 struct ast *newcmp(int cmptype, struct ast *l, struct ast *r);
-struct ast *newfunc(int functype, struct ast *l);
-struct ast *newcall(struct symbol *s, struct ast *l);
-struct ast *newref(struct symbol *s);
+// struct ast *newfunc(int functype, struct ast *l);
+// struct ast *newcall(struct symbol *s, struct ast *l);
+// struct ast *newref(struct symbol *s);
 struct ast *newasgn(struct symbol *s, struct ast *v);
 struct ast *newnum(int num);
-struct ast *newflow(int nodetype, struct ast *cond, struct ast *tl, struct ast *tr);
+// struct ast *newflow(int nodetype, struct ast *cond, struct ast *tl, struct ast *tr);
 
 /* define a function */
-void dodef(struct symbol *name, struct symlist *syms, struct ast *stmts);
+//void dodef(struct symbol *name, struct symlist *syms, struct ast *stmts);
 
 /* evaluate an AST */
-int eval(struct ast *);
+//int eval(struct ast *);
+
+/* Code Generation */
+static int genAST(struct ASTnode *n, int reg);
+//void generatecode(struct ASTnode *n);
+
+void freeall_registers();
+static int alloc_register();
+static void free_register(int reg);
+int cgloadint(int value);
+int cgadd(int r1, int r2);
+int cgmul(int r1, int r2);
+int cgsub(int r1, int r2);
+int cgdiv(int r1, int r2);
+void cgprintint(int r);
+void cgpreamble();
+void cgpostamble();
+int cgloadglob(char *identifier);
+int cgstorglob(int r, char *identifier);
+void cgglobsym(char *sym);
 
 /* delete and free an AST */
 void treefree(struct ast *);

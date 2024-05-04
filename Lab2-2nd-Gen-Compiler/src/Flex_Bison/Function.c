@@ -90,6 +90,7 @@ struct ast *newcmp(int cmptype, struct ast *l, struct ast *r)
     return a;
 }
 
+/*
 struct ast *newfunc(int functype, struct ast *l)
 {
     struct fncall *a = malloc(sizeof(struct fncall));
@@ -102,7 +103,9 @@ struct ast *newfunc(int functype, struct ast *l)
     a->functype = functype;
     return (struct ast *)a;
 }
+*/
 
+/*
 struct ast *newcall(struct symbol *s, struct ast *l)
 {
     struct ufncall *a = malloc(sizeof(struct ufncall));
@@ -115,6 +118,7 @@ struct ast *newcall(struct symbol *s, struct ast *l)
     a->s = s;
     return (struct ast *)a;
 }
+*/
 
 struct ast *newref(struct symbol *s)
 {
@@ -141,6 +145,7 @@ struct ast *newasgn(struct symbol *s, struct ast *v)
     return (struct ast *)a;
 }
 
+/*
 struct ast *newflow(int nodetype, struct ast *cond, struct ast *tl, struct ast *el)
 {
     struct flow *a = malloc(sizeof(struct flow));
@@ -154,6 +159,7 @@ struct ast *newflow(int nodetype, struct ast *cond, struct ast *tl, struct ast *
     a->el = el;
     return (struct ast *)a;
 }
+*/
 
 /* free a tree of ASTs */
 void treefree(struct ast *a)
@@ -169,7 +175,7 @@ void treefree(struct ast *a)
             treefree(a->r);
 
         /* one subtree */
-        case 'M': case 'C': case 'F':
+        case 'F':// case 'M': case 'C':
             treefree(a->l);
 
         /* no subtree */
@@ -181,11 +187,13 @@ void treefree(struct ast *a)
         break;
 
         /* up to three subtrees */
+        /*
         case 'I': case 'W':
             free( ((struct flow *)a)->cond);
             if( ((struct flow *)a)->tl) treefree( ((struct flow *)a)->tl);
             if( ((struct flow *)a)->el) treefree( ((struct flow *)a)->el);
             break;
+        */
 
         default:
             printf("internal error: free bad node %c\n", a->nodetype);
@@ -216,8 +224,8 @@ void symlistfree(struct symlist *sl)
     }
 }
 
-static double callbuiltin(struct fncall *);
-static double calluser(struct ufncall *);
+static int callbuiltin(struct fncall *);
+//static int calluser(struct ufncall *);
 
 int eval(struct ast *a)
 {
@@ -225,7 +233,7 @@ int eval(struct ast *a)
 
     if(!a) {
         yyerror("internal error, null eval");
-        return 0.0;
+        return 0;
     }
 
     switch(a->nodetype) {
@@ -258,63 +266,62 @@ int eval(struct ast *a)
     /* null expressions allowed in the grammar, so check for them */
     
     /* if/then/else */
+    /*
     case 'I':
         if( eval( ((struct flow *)a)->cond) != 0) { 
             if( ((struct flow *)a)->tl) {
                 v = eval( ((struct flow *)a)->tl);
             } else
-                v = 0.0; /* a default value */
+                v = 0; // a default value
         } else {
             if( ((struct flow *)a)->el) {
                 v = eval(((struct flow *)a)->el);
             } else
-                v = 0.0; /* a default value */
+                v = 0; // a default value
     }
     break;
+    */
 
     /* while/do */
+    /*
     case 'W':
-        v = 0.0; /* a default value */
+        v = 0.0; // a default value
 
         if( ((struct flow *)a)->tl) {
             while( eval(((struct flow *)a)->cond) != 0)
                 v = eval(((struct flow *)a)->tl);
         }
-    break; /* value of last statement is value of while/do */
-    
+    break; // value of last statement is value of while/do
+    */
+   
     /* list of statements */
     case 'L': eval(a->l); v = eval(a->r); break;
 
     case 'F': v = callbuiltin((struct fncall *)a); break;
 
-    case 'C': v = calluser((struct ufncall *)a); break;
+    //case 'C': v = calluser((struct ufncall *)a); break;
 
     default: printf("internal error: bad node %c\n", a->nodetype);
     }
     return v;
 }
 
-static double callbuiltin(struct fncall *f)
+static int callbuiltin(struct fncall *f)
 {
     enum bifs functype = f->functype;
-    double v = eval(f->l);
+    int v = eval(f->l);
     switch(functype) {
-        case B_sqrt:
-            return sqrt(v);
-        case B_exp:
-            return exp(v);
-        case B_log:
-            return log(v);
-        case B_print:
+        case B_println_int:
             printf("= %d\n", v);
             return v;
         default:
             yyerror("Unknown built-in function %d", functype);
-            return 0.0;
+            return 0;
     }
 }
 
 /* define a function */
+/*
 void dodef(struct symbol *name, struct symlist *syms, struct ast *func)
 {
     if(name->syms) symlistfree(name->syms);
@@ -322,15 +329,16 @@ void dodef(struct symbol *name, struct symlist *syms, struct ast *func)
     name->syms = syms;
     name->func = func;
 }
+*/
 
-static double
-calluser(struct ufncall *f)
+/*
+static int calluser(struct ufncall *f)
 {
-    struct symbol *fn = f->s; /* function name */
-    struct symlist *sl; /* dummy arguments */
-    struct ast *args = f->l; /* actual arguments */
-    double *oldval, *newval; /* saved arg values */
-    double v;
+    struct symbol *fn = f->s; // function name
+    struct symlist *sl; // dummy arguments
+    struct ast *args = f->l; // actual arguments
+    int *oldval, *newval; // saved arg values
+    int v;
     int nargs;
     int i;
 
@@ -339,35 +347,35 @@ calluser(struct ufncall *f)
         return 0;
     }
 
-    /* count the arguments */
+    // count the arguments
     sl = fn->syms;
     for(nargs = 0; sl; sl = sl->next)
         nargs++;
 
-    /* prepare to save them */
-    oldval = (double *)malloc(nargs * sizeof(double));
-    newval = (double *)malloc(nargs * sizeof(double));
+    // prepare to save them
+    oldval = (int *)malloc(nargs * sizeof(int));
+    newval = (int *)malloc(nargs * sizeof(int));
     if(!oldval || !newval) {
         yyerror("Out of space in %s", fn->name); return 0.0;
     }
 
-    /* evaluate the arguments */
+    // evaluate the arguments
     for(i = 0; i < nargs; i++) {
         if(!args) {
             yyerror("too few args in call to %s", fn->name);
             free(oldval); free(newval);
             return 0.0;
         }
-        if(args->nodetype == 'L') { /* if this is a list node */
+        if(args->nodetype == 'L') { // if this is a list node
             newval[i] = eval(args->l);
             args = args->r;
-        } else { /* if it's the end of the list */
+        } else { // if it's the end of the list
             newval[i] = eval(args);
             args = NULL;
         }
     }
 
-    /* save old values of dummies, assign new ones */
+    // save old values of dummies, assign new ones
     sl = fn->syms;
     for(i = 0; i < nargs; i++) {
         struct symbol *s = sl->sym;
@@ -377,10 +385,10 @@ calluser(struct ufncall *f)
     }
     free(newval);
 
-    /* evaluate the function */
+    // evaluate the function
     v = eval(fn->func);
 
-    /* put the real values of the dummies back */
+    // put the real values of the dummies back
     sl = fn->syms;
     for(i = 0; i < nargs; i++) {
         struct symbol *s = sl->sym;
@@ -391,6 +399,7 @@ calluser(struct ufncall *f)
     free(oldval);
     return v;
 }
+*/
 
 void yyerror(char *s, ...)
 {
