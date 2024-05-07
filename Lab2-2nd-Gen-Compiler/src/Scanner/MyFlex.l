@@ -86,10 +86,10 @@
 
     /* comparison ops, all are a CMP token */
     /* Higher Precedence */
-">" { yylval.fn = 1; return LGE; }
-"<" { yylval.fn = 2; return LGE; }
-">=" { yylval.fn = 3; return LGE; }
-"<=" { yylval.fn = 4; return LGE; }
+">" { yylval.fn = 1; return LGTE; }
+"<" { yylval.fn = 2; return LGTE; }
+">=" { yylval.fn = 3; return LGTE; }
+"<=" { yylval.fn = 4; return LGTE; }
     /* Lower Precedence */
 "!=" { yylval.fn = 5; return EQN; }
 "==" { yylval.fn = 6; return EQN; }
@@ -97,15 +97,17 @@
 
 
     /* built-in functions */
-"println_int" { yylval.fn = B_println_int; return FUNC; } /* MyFlex.l:116: warning, rule cannot be matched */
+"println_int" { return PRINTLN_INT; } /* MyFlex.l:116: warning, rule cannot be matched */
 
     /* 标识符：[A-Za-z_][0-9A-Za-z_]*/
     /* 不含 UCN, implementation-defined 字符。*/
     /* Starting Condition? */
     /* printf 双引号需要转义 */
 [_[:alpha:]][_[:alnum:]]*     {
-                    //chars += yyleng;
-                    //printf("Identifier\n");
+
+                    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                    // Don't use yylval.s = yytext directly here!
+                    yylval.s = strdup(yytext);
                     return ID;
                 }
 
@@ -130,9 +132,10 @@
 ([[:digit:]]{-}[0])[[:digit:]]* |
 0    {
                     //printf("Literal\n");
-                    //叫做 NUMBER 是为了方便之后扩展 Parser 中句法。
-                    yylval.num = atof(yytext);
-                    return NUMBER;
+                    //之前叫做 NUMBER 是为了方便之后扩展 Parser 中句法。
+                    //还是叫 INTLIT 吧，下回就得 double, float 了估计。
+                    yylval.intval = atof(yytext);
+                    return INTLIT;
                 }
 
     /* "//".* */

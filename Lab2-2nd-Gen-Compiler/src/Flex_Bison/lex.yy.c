@@ -904,22 +904,22 @@ YY_RULE_SETUP
 case 19:
 YY_RULE_SETUP
 #line 90 "MyFlex.l"
-{ yylval.fn = 1; return LGE; }
+{ yylval.fn = 1; return LGTE; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
 #line 91 "MyFlex.l"
-{ yylval.fn = 2; return LGE; }
+{ yylval.fn = 2; return LGTE; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
 #line 92 "MyFlex.l"
-{ yylval.fn = 3; return LGE; }
+{ yylval.fn = 3; return LGTE; }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
 #line 93 "MyFlex.l"
-{ yylval.fn = 4; return LGE; }
+{ yylval.fn = 4; return LGTE; }
 	YY_BREAK
 /* Lower Precedence */
 case 23:
@@ -936,7 +936,7 @@ YY_RULE_SETUP
 case 25:
 YY_RULE_SETUP
 #line 101 "MyFlex.l"
-{ yylval.fn = B_println_int; return FUNC; } /* MyFlex.l:116: warning, rule cannot be matched */
+{ return PRINTLN_INT; } /* MyFlex.l:116: warning, rule cannot be matched */
 	YY_BREAK
 /* 标识符：[A-Za-z_][0-9A-Za-z_]*/
 /* 不含 UCN, implementation-defined 字符。*/
@@ -946,8 +946,10 @@ case 26:
 YY_RULE_SETUP
 #line 107 "MyFlex.l"
 {
-                    //chars += yyleng;
-                    //printf("Identifier\n");
+
+                    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                    // Don't use yylval.s = yytext directly here!
+                    yylval.s = strdup(yytext);
                     return ID;
                 }
 	YY_BREAK
@@ -967,27 +969,28 @@ YY_RULE_SETUP
 /* https://stackoverflow.com/questions/26625311/is-0-an-octal-or-a-decimal-in-c */
 /* https://stackoverflow.com/questions/6895522/is-0-a-decimal-literal-or-an-octal-literal */
 case 27:
-#line 132 "MyFlex.l"
+#line 134 "MyFlex.l"
 case 28:
 YY_RULE_SETUP
-#line 132 "MyFlex.l"
+#line 134 "MyFlex.l"
 {
                     //printf("Literal\n");
-                    //叫做 NUMBER 是为了方便之后扩展 Parser 中句法。
-                    yylval.num = atof(yytext);
-                    return NUMBER;
+                    //之前叫做 NUMBER 是为了方便之后扩展 Parser 中句法。
+                    //还是叫 INTLIT 吧，下回就得 double, float 了估计。
+                    yylval.intval = atof(yytext);
+                    return INTLIT;
                 }
 	YY_BREAK
 /* "//".* */
 case 29:
 YY_RULE_SETUP
-#line 140 "MyFlex.l"
+#line 143 "MyFlex.l"
 {/* ignore whitespace */}
 	YY_BREAK
 case 30:
 /* rule 30 can match eol */
 YY_RULE_SETUP
-#line 141 "MyFlex.l"
+#line 144 "MyFlex.l"
 { /* return CRLF; */ }
 	YY_BREAK
 /* Again, harking back to the earliest versions of lex,
@@ -1002,15 +1005,15 @@ YY_RULE_SETUP
      */
 case 31:
 YY_RULE_SETUP
-#line 155 "MyFlex.l"
+#line 158 "MyFlex.l"
 { yyerror("Mystery character %c\n", *yytext); }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 156 "MyFlex.l"
+#line 159 "MyFlex.l"
 ECHO;
 	YY_BREAK
-#line 1013 "lex.yy.c"
+#line 1016 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2027,6 +2030,6 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 156 "MyFlex.l"
+#line 159 "MyFlex.l"
 
 

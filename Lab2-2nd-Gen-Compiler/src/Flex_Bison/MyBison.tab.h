@@ -54,19 +54,14 @@ extern int yydebug;
     YYEOF = 0,                     /* "end of file"  */
     YYerror = 256,                 /* error  */
     YYUNDEF = 257,                 /* "invalid token"  */
-    NUMBER = 258,                  /* NUMBER  */
+    INTLIT = 258,                  /* INTLIT  */
     ID = 259,                      /* ID  */
-    FUNC = 260,                    /* FUNC  */
-    CRLF = 261,                    /* CRLF  */
-    IF = 262,                      /* IF  */
-    THEN = 263,                    /* THEN  */
-    ELSE = 264,                    /* ELSE  */
-    WHILE = 265,                   /* WHILE  */
-    DO = 266,                      /* DO  */
-    LET = 267,                     /* LET  */
-    RETURN = 268,                  /* RETURN  */
-    CMP = 269,                     /* CMP  */
-    UMINUS = 270                   /* UMINUS  */
+    PRINTLN_INT = 260,             /* PRINTLN_INT  */
+    RETURN = 261,                  /* RETURN  */
+    MAIN = 262,                    /* MAIN  */
+    INT = 263,                     /* INT  */
+    EQN = 264,                     /* EQN  */
+    LGTE = 265                     /* LGTE  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -75,15 +70,14 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 24 "MyBison.y"
+#line 26 "MyBison.y"
 
-    struct ast *a;
-    int num;
-    struct symbol *s; /* which symbol */
-    struct symlist *sl;
+    struct ASTnode *a;
+    int intval;
+    const char* s; /* which symbol */
     int fn; /* which function */
 
-#line 87 "MyBison.tab.h"
+#line 81 "MyBison.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

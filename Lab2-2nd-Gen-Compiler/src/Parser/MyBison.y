@@ -1,18 +1,19 @@
 /* 
  * Parser
  *
- * 基于：
+ * 基于： acwj/07_Comparisons
  * https://ustc-compiler-principles.github.io/2023/lab1/Bison/
  * “一个复杂的 Bison 程序”--calc.y
  * 以及 flex & bison Example 3-2.
  * Bison parser for AST calculator
- * + acwj/06_Variables
  */
 
 %{
 #include <stdio.h>
 #include <stdlib.h>
-#include "Declare.h"
+#include <string.h>
+#include "defs.h"
+#include "declare.h"
 %}
 
 /*
@@ -23,17 +24,20 @@
  */
 
 %union {
-    struct ast *a;
-    int num;
-    struct symbol *s; /* which symbol */
-    //struct symlist *sl;
+    struct ASTnode *a;
+    int intval;
+    const char* s; /* which symbol */
     int fn; /* which function */
 }
 
 /* declare tokens */
-%token <num> NUMBER
+
+%token <intval> INTLIT
 %token <s> ID
-%token <fn> FUNC
+
+
+// %token <fn> FUNC
+%token PRINTLN_INT
 // %token CRLF
 
 // %token IF THEN ELSE WHILE DO 
@@ -57,13 +61,13 @@
 %left '^'
 %left '&'
 %left <fn> EQN
-%left <fn> LGE // 理论上可以细分
+%left <fn> LGTE // 理论上可以细分
 %left '+' '-'
 %left '*' '/' '%'
 //%nonassoc UMINUS
 /* higher */
 
-%type <a> exp stmt 
+%type <a> exp
 //%type <sl> symlist
 %start program
 
@@ -105,11 +109,13 @@ stmt: IF exp THEN list { $$ = newflow('I', $2, $4, NULL); }
 // Bison handles left recursion much
 // more efficiently than right recursion.
 
-program : INT MAIN '(' ')' '{' stmts '}'                        {}
-        | INT MAIN '(' INT ident ',' INT ident ')' '{' stmts '}'{}
-
+// Using Mid-Rule Actions
+// https://www.gnu.org/software/bison/manual/html_node/Using-Mid_002dRule-Actions.html
+program : INT MAIN '(' ')' {genpreamble();} '{' stmts '}'   {}
+        | INT MAIN '(' INT ID ',' INT ID ')' {genpreamble(); addlocal($5); addlocal($8);} '{' stmts '}' {}
 ;
 
+// Parse one or more statements
 stmts   : stmt      {}
         | stmt stmts{}
 ;
@@ -118,29 +124,54 @@ stmts   : stmt      {}
 // https://lists.gnu.org/archive/html/help-bison/2000-10/msg00056.html
 // { $$ = $1; }; by default
 
-stmt : INT ident ';'        {}
-     | INT ident '=' exp ';'{}
-     | ident '=' exp ';'    {}
-     | FUNC '(' exp ')' ';' {}
-     | RETURN exp ';'       {}
+
+/* stmt : INT ID ';' {...}
+ *      | ID '=' exp ';' {...} 
+ * Flex 中标识符如果是 yylval.s = yytext; 而非 yylval.s = strdup(yytext);
+ * 则 stmt 中尝试得到 ID 所对应的 $n 字符串时，会得到自*yytext地址往后的一长串，
+ * 但是 exp 中又可以得到正确的 $1。 此外某种可能的尝试是得到一个 std::string 以传递，
+ * 但将 Bison 改成 C++ 语法似乎比较麻烦，捣腾了一波没弄成。
+ * https://stackoverflow.com/questions/49331561/flex-bison-yytext-skips-over-a-value
+ * https://stackoverflow.com/questions/22435879/bison-printing-variable-from-flex-wrong
+ * {ID}    {yylval.id = malloc(yyleng + 1); strcpy(yylval.id, yytext); return ID;}
+ * https://lists.gnu.org/archive/html/bison-patches/2003-03/msg00055.html
+ * strdup 动态分配内存的释放：（OS 还会出手吗？）
+ * https://stackoverflow.com/questions/31104302/freeing-the-string-allocated-in-strdup-from-flex-bison
+ * https://westes.github.io/flex/manual/A-Note-About-yytext-And-Memory.html
+ */
+
+stmt : INT ID ';'        { var_declaration($2); }
+     | ID '=' exp ';'    { assignment_statement($1, $3); }
+        /* The parser doesn't know which rule to take --until it's
+         * parsed the next token to see if it is a '='. By the time
+         * the code is executed, yytext has already been overwritten.
+         * 这也是何以即便采用了 Mid-Rule，仍得不到正确的结果，如：
+         * ID {printf("%s \n\n", $1);} '=' exp ';' {...}
+         */
+     | PRINTLN_INT '(' exp ')' ';' { println_int_statement($3); }
+     | RETURN exp ';'       { return_statement($2); }
 ;
 
-ident: ID
-;
-
-exp : exp '*' exp { $$ = newast('*', $1,$3); }
-    | exp '/' exp { $$ = newast('/', $1,$3); }
-    | exp '%' exp { $$ = newast('%', $1,$3); }
-    | exp '+' exp { $$ = newast('+', $1,$3); }
-    | exp '-' exp { $$ = newast('-', $1,$3); }
-    | exp LGE exp { $$ = newcmp($2, $1, $3); }
-    | exp EQN exp { $$ = newcmp($2, $1, $3); }
-    | exp '&' exp { $$ = newast('&', $1,$3); }
-    | exp '^' exp { $$ = newast('^', $1,$3); }
-    | exp '|' exp { $$ = newast('|', $1,$3); }
+exp : exp '*' exp { $$ = mkastnode('*', $1, $3, 0); }
+    | exp '/' exp { $$ = mkastnode('/', $1, $3, 0); }
+    | exp '%' exp { $$ = mkastnode('%', $1, $3, 0); }
+    | exp '+' exp { $$ = mkastnode('+', $1, $3, 0); }
+    | exp '-' exp { $$ = mkastnode('-', $1, $3, 0); }
+    | exp LGTE exp { $$ = mkastnode($2, $1, $3, 0); }
+    | exp EQN exp { $$ = mkastnode($2, $1, $3, 0); }
+    | exp '&' exp { $$ = mkastnode('&', $1, $3, 0); }
+    | exp '^' exp { $$ = mkastnode('^', $1, $3, 0); }
+    | exp '|' exp { $$ = mkastnode('|', $1, $3, 0); }
     | '(' exp ')' { $$ = $2; }
-    | NUMBER { $$ = newnum($1); }
-    | ident { $$ = newref($1); }
+    | INTLIT { $$ = mkastleaf(A_INTLIT, $1); }
+    | ID {
+        // Check that this identifier exists
+        int id = findlocal($1);
+        if (id == -1)
+            yyerror("Unknown variable %s", $1);
+        // Make a leaf AST node for it
+        $$ = mkastleaf(A_IDENT, id);
+        }
 
     //| '-' exp %prec UMINUS { $$ = newast('M', $2, NULL); }
     // 其实负数已经含在 NUMBER 里了，但是对于 '-' ID 的情况，仍然需要处理

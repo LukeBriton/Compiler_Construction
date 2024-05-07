@@ -1,137 +1,67 @@
 /*
  * Declarations
  *
- * 基于：
+ * 基于： acwj/07_Comparisons
  * flex & bison Example 3-1.
  * Calculator that builds an AST: header fb3-1.h
  * Example 3-5.
  * Advanced calculator header fb3-2.h
- * + acwj/06_Variables
  */
+#include <string>
 
-/* interface to the lexer */
+
+/* interface to the lexer & parser */
+extern int yylex(void);
+extern int yyparse(void);
 extern int yylineno; /* from lexer */
-void yyerror(char *s, ...);
+extern FILE *yyin;  // 声明yyin
+void yyerror(const char *s, ...);
 
-/* symbol table */
-struct symbol { /* a variable name */
-    char *name;
-    int value;
-    struct ast *func; /* stmt for the function */
-    struct symlist *syms; /* list of dummy args */
-};
-
-/* simple symtab of fixed size */
-#define NHASH 9997
-extern struct symbol symtab[NHASH];
-
-struct symbol *lookup(char*);
-
-/* list of symbols, for an argument list */
-struct symlist {
-    struct symbol *sym;
-    struct symlist *next;
-};
-
-struct symlist *newsymlist(struct symbol *sym, struct symlist *next);
-void symlistfree(struct symlist *sl);
-
-/* node types
- * + - * / % & | ^
- * 0-7 comparison ops, bit coded 04 equal, 02 less, 01 greater
- * M unary minus
- * L expression or statement list
- * I IF statement
- * W WHILE statement
- * N symbol ref
- * = assignment
- * S list of symbols
- * F built in function call
- * C user function call
- */
-
-enum bifs { /* built-in functions */
-    B_println_int = 1
-};
-
-/* nodes in the abstract syntax tree */
-/* all have common initial nodetype */
-
-struct ast {
-    int nodetype;
-    struct ast *l;
-    struct ast *r;
-};
-
-struct fncall { /* built-in function */
-    int nodetype; /* type F */
-    struct ast *l;
-    enum bifs functype;
-};
-
-//struct ufncall { /* user function */
-//    int nodetype; /* type C */
-//    struct ast *l; /* list of arguments */
-//    struct symbol *s;
-//};
-
-//struct flow {
-//    int nodetype; /* type I or W */
-//    struct ast *cond; /* condition */
-//    struct ast *tl; /* then branch or do list */
-//    struct ast *el; /* optional else branch */
-//};
-
-struct numval {
-    int nodetype; /* type K for constant */
-    int number;
-};
-
-struct symref {
-    int nodetype; /* type N */
-    struct symbol *s;
-};
-
-struct symasgn {
-    int nodetype; /* type = */
-    struct symbol *s;
-    struct ast *v; /* value */
-};
-
-/* build an AST */
-struct ast *newast(int nodetype, struct ast *l, struct ast *r);
-struct ast *newcmp(int cmptype, struct ast *l, struct ast *r);
-// struct ast *newfunc(int functype, struct ast *l);
-// struct ast *newcall(struct symbol *s, struct ast *l);
-// struct ast *newref(struct symbol *s);
-struct ast *newasgn(struct symbol *s, struct ast *v);
-struct ast *newnum(int num);
-// struct ast *newflow(int nodetype, struct ast *cond, struct ast *tl, struct ast *tr);
-
-/* define a function */
-//void dodef(struct symbol *name, struct symlist *syms, struct ast *stmts);
-
-/* evaluate an AST */
-//int eval(struct ast *);
+// ast.cpp
+struct ASTnode *mkastnode(int op, struct ASTnode *left,
+			  struct ASTnode *right, int intvalue);
+struct ASTnode *mkastleaf(int op, int intvalue);
+struct ASTnode *mkastunary(int op, struct ASTnode *left, int intvalue);
 
 /* Code Generation */
-static int genAST(struct ASTnode *n, int reg);
-//void generatecode(struct ASTnode *n);
+// gen.cpp
+void genAST(struct ASTnode *n);
+void genpreamble();
+void genprintln_int(int reg);
 
-void freeall_registers();
-static int alloc_register();
-static void free_register(int reg);
-int cgloadint(int value);
-int cgadd(int r1, int r2);
-int cgmul(int r1, int r2);
-int cgsub(int r1, int r2);
-int cgdiv(int r1, int r2);
-void cgprintint(int r);
+// cg.cpp
+void freeall_registers(void);
 void cgpreamble();
-void cgpostamble();
-int cgloadglob(char *identifier);
-int cgstorglob(int r, char *identifier);
-void cgglobsym(char *sym);
 
-/* delete and free an AST */
-void treefree(struct ast *);
+void cgadd(void);
+void cgsub(void);
+void cgmul(void);
+void cgdiv(void);
+
+void cgand(void);
+void cgor(void);
+void cgxor(void);
+
+void cgmod(void);
+
+void cggt(void);
+void cglt(void);
+void cgge(void);
+void cgle(void);
+void cgneq(void);
+void cgeq(void);
+
+void cgprintln_int(int r);
+void cgloadint(int value);
+void cgloadlocal(char *identifier);
+void cgstorlocal(int r, char *identifier);
+
+// stmt.cpp
+void println_int_statement(struct ASTnode *exp);
+void var_declaration(const char* name);
+void assignment_statement(const char* name, struct ASTnode *exp);
+void return_statement(struct ASTnode *exp);
+
+// sym.cpp
+int findlocal(const char* name);
+int addlocal(const char* name);
