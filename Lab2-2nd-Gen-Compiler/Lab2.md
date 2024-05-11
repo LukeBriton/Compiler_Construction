@@ -20,9 +20,9 @@
 
 ![Tr0y_Frontend.png](./img/Tr0y_Frontend.png)[^7]
 
-![image-20240310150850583](C:\Users\dell\Documents\GitHub\Compiler_Construction\Lab1-1st-Gen-Compiler\img\Phrases.png)[^8]
+![Phrases](./img/Phrases.png)[^8]
 
-![image-20240310151345149](C:\Users\dell\Documents\GitHub\Compiler_Construction\Lab1-1st-Gen-Compiler\img\Crafting_a_Compiler.png)[^9]
+![Crafting a Compiler](./img/Crafting_a_Compiler.png)[^9]
 
 ## 安排
 
@@ -209,6 +209,8 @@ Silly of me!!!
 
 ### 零宽断言
 
+偶然找到的详细讲解：[Lookahead and Lookbehind Zero-Length Assertions](www.regular-expressions.info/lookaround.html)
+
 > 此外，由于Flex处理的是字符流，而不是基于预先定义的正则表达式引擎，所以一些特定的正则表达式功能（如零宽断言）在Flex中可能难以直接实现。因此，设计Flex规则时通常需要采用更为直接的字符匹配和状态管理方式。
 > 实际上，正确实现上述需求的Flex代码可能会更加复杂，涉及使用开始(`^`)和结束(`$`)匹配符号的条件，以及可能需要通过在动作代码中进一步处理匹配到的文本。在上述示例中，我简化了模式以便于说明，但在实践中，可能需要结合使用状态（start conditions）和更精细的模式匹配逻辑来准确捕获这些场景。
 > 在Flex中，你无法直接创建一个规则，既检查前后的字符又不将这些字符作为匹配的一部分（即实现类似正则表达式的零宽断言）。但是，你可以通过编写规则和相应的动作代码来间接实现这个目的。 **⚠️ ChatGPT 4 生成（待考）**
@@ -357,6 +359,49 @@ You don't need to do anything with flex or bison to use C++, I have done it many
 
 不过根据 lab2 的经验，要是 .l 文件调用了 C++ 相关的函数，需要将 Flex 生成的 lex.yy.c 改后缀名为 .cpp，以在参与编译时使用之。
 
+### yytext
+
+Because `yytext` is a global variable, it's overwritten and you will have to copy it in your *lex* script. In a pure parser, even though it's not global anymore it's still reused and passed as a parameter so it's incorrect to use it's value like you are attempting.
+
+Also, don't use it in bison, instead use `$n` where `n` is the position of the token in the rule.
+
+So in the *flex* file, if you want to capture the text do something like
+
+```C
+[A-Za-z]+               { yylval.name = strdup(yytext); return NAMETOKEN; }
+```
+and remember, do not use `yytext` in *bison*, it's an internal thing used by the lexer.
+
+[Flex/Bison: yytext skips over a value](https://stackoverflow.com/questions/49331561/flex-bison-yytext-skips-over-a-value)[](https://stackoverflow.com/posts/22437970/timeline)
+
+You have to copy yytext, it's an internal buffer in flex.
+
+I.e., instead of
+
+```C
+{ID}        { yylval.id = yytext; return ID; }
+```
+something like:
+
+```c
+{ID}    {yylval.id = malloc(yyleng + 1); strcpy(yylval.id, yytext); return ID;}
+```
+Obviously that's not robust, since it doesn't do error checking, and you have to deal with freeing the memory in the parser that doesn't end up in a tree, and deal with freeing it from the tree, etc. But that is the basic idea.
+
+`yylval.id = strdup(yytext);` is a lot simpler, and less accident-prone. You still need to `free` the returned value, of course.
+
+`strdup` is useful, but it's posix so isn't always available. Oh, and `strdup` has to calculate strlen, whereas it's sitting there for free as `yyleng`.
+
+embedded nulls in identifiers? brilliant! j/k of course, they'd normally be in a symbol table, this method is more for strings anyway.
+
+[Bison printing variable from flex wrong](https://stackoverflow.com/questions/22435879/bison-printing-variable-from-flex-wrong)
+
+[strdup (yytext)](https://lists.gnu.org/archive/html/bison-patches/2003-03/msg00055.html)
+
+[freeing the string allocated in strdup() from flex/bison](https://stackoverflow.com/questions/31104302/freeing-the-string-allocated-in-strdup-from-flex-bison)
+
+[Lexical Analysis With Flex, for Flex 2.6.2: A Note About yytext And Memory](https://westes.github.io/flex/manual/A-Note-About-yytext-And-Memory.html)
+
 ## Parser(Syntactic Analysis, 句法分析)[^par]
 
 ### [Symbols](https://www.gnu.org/software/bison/manual/html_node/Symbols.html)
@@ -404,6 +449,98 @@ MyBison.y: note: rerun with option '-Wcounterexamples' to generate conflict coun
 ```
 
 参考：[Where are the shift/reduce conflicts in this Bison code coming from?](https://stackoverflow.com/questions/3264884/where-are-the-shift-reduce-conflicts-in-this-bison-code-coming-from)
+
+### [Mid-Rule](https://www.gnu.org/software/bison/manual/html_node/Using-Mid_002dRule-Actions.html)
+
+### Recursive Rules
+
+**⚠️Deprecated⚠️** "explanation" by ChatGPT 4, an exercise to judge its correctness:（其连 left-recursive 还是 right-recursive 都没搞明白）
+
+https://chatgpt.com/share/5618789d-62e3-4bb2-be6e-1f58ee2f8f85
+
+```C
+list: /* nothing */ { $$ = NULL; }
+	| stmt ';' list { if ($3 == NULL)
+							$$ = $1;
+						else
+							$$ = newast('L', $1, $3);
+					}
+;
+```
+
+The definition of list is right recursive, that is, `stmt ; list` rather than `list stmt ;`. It doesn’t make any difference to the language recognized, but it makes it easier to build the list of statements linked from head to tail rather than from tail to head. Each time the `stmt ; list` rule is reduced, it creates a link that adds the statement to the head of the list so far. If the rule were `list stmt ;`, the statement would need to go at the tail of the list, which would require either a more complex circularly linked list or else reversing the list at the end (as we did with the list of references in Chapter 1).
+
+One disadvantage of right recursion rather than left is that right recursion puts up all of the yet-to-be-reduced statements on the parser stack and then reduces them all at the end of the list, while left recursion builds the list a statement at a time as the input is parsed. In a situation like this, where the list is unlikely to be more than a few items long, it doesn’t matter, but in a language where the list might be a list of thousands of items, it’s worth making the list with a left recursive rule and then reversing it to prevent parser stack overflow. Some programmers also find left recursion to be easier to debug, since it tends to produce output after each statement rather than all at once at the end.
+
+Flex & Bison P66
+
+```C
+exprlist: exprlist ',' expr ; /* left recursion */
+
+exprlist: expr ',' exprlist ; /* right recursion */
+```
+
+In most cases, you can write the grammar either way. Bison handles left recursion much more efficiently than right recursion. This is because its internal stack keeps track of all symbols seen so far for all partially parsed rules. If you use the right-recursive version of `exprlist` and have an expression with 10 expressions in it, by the time the 10th expression is read, there will be 20 entries on the stack: an `expr` and a comma for each of the 10 expressions. When the list ends, all of the nested `exprlist`s will be reduced, starting from right to left. On the other hand, if you use the left-recursive version, the `exprlist` rule is reduced after each `expr`, so the list will never have more than three entries on the internal stack.
+
+Right-recursive grammars can be useful for a list of items that you know will be short and that you want to make into a linked list of values:
+
+```c
+thinglist: THING { $$ = $1; }
+		 | THING thinglist { $1->next = $2; $$ = $1; }
+;
+```
+
+With a left-recursive grammar, either you end up with the list linked in reverse order with a reversal step at the end or you need extra code to search for the end of the list at each stage in order to add the next thing to the end.
+
+Flex & Bison P156[^rec]
+
+Contrary to top-down (LL) parsers, which do not support left recursion, bottom-up (LR) parsers support both left recursion and right recursion.
+
+[Left-recursive versus right-recursive lists in LR parsers](https://gallium.inria.fr/blog/lr-lists)
+
+[Practical Considerations for LALR(1) Grammars](http://lambda.uta.edu/cse5317/spring03/notes/node21.html)
+
+[Right recursion versus left recursion
+](https://www.ibm.com/docs/en/zos/3.1.0?topic=topics-right-recursion-versus-left-recursion)
+[Explanation of `input` (Bison 3.8.1)](https://www.gnu.org/software/bison/manual/html_node/Rpcalc-Input.html)
+
+[Recursion (Bison 3.8.1)](https://www.gnu.org/software/bison/manual/html_node/Recursion.html)
+
+[Why is left recursion bad?](https://cs.stackexchange.com/questions/9963/why-is-left-recursion-bad)
+
+[Actions order in Bison](https://stackoverflow.com/questions/6836077/actions-order-in-bison)
+
+That's not the reason to use left-recursion though. You use left-recursion because it accurately describes the language. If you have `7 - 2 - 1`, you want the result to be 4, because that's what algebraic rules require: the expression is parsed as though it were `(7 - 2) - 1`, so `7 - 2` must be reduced first. With right-recursion, you would incorrectly evsluate that as 6, because the `2 - 1` would reduce first.
+
+LL (topdown) parsing uses lookahead to *predict* which production will be reduced. It can't handle left-recursion at all because the prediction ends up in a recursive loop: `expression` starts with an `expression` which starts with an `expression` … and the parser never manages to predict a `NUMBER`. So with LL parsers, you have to use right-recursion and then your grammar does not correctly describe the language (assuming that the language has left-associative operators, as is usually the case). Some people don't mind this, but I think that grammars should actually indicate the correct parse, and I find the modification necessary to make a grammar parseable with a top-down parser to be messy and hard to read. Your mileage may vary.
+
+[Left/Right recursion and Bison parsing stack behavior](https://stackoverflow.com/questions/48604590/left-right-recursion-and-bison-parsing-stack-behavior)
+
+```C
+e → e PLUS t
+e → t 
+t → t TIMES f
+t → f
+f → LPAREN e RPAREN
+f → ID
+```
+
+for test input `x`：
+
+Bison generates a [bottom-up](http://en.wikipedia.org/wiki/Bottom-up_parsing) [LALR(1)](http://en.wikipedia.org/wiki/LALR) parser. You can imagine its workings like this:
+
+1. It reads one token from the lexer, namely an `ID`.
+2. It sees that there is no case where a piece with zero terminals is followed by `ID`, so it knows that it can simply **shift** this token. Now it has that `ID` terminal on its stack.
+3. After shifting the token, it reads one more token, which will be the end of input marker in your case.
+4. The only valid thing to do with an `ID` is **reducing** it to `f`. So it applies `f → ID` and now has an `f` on its stack.
+5. Next it **reduces** using `t → f` to obtain an `t`.
+6. As the look-ahead is not `TIMES`, the rule `t → t TIMES f` won't apply, so it **reduces** using `e → t` to obtain `e`.
+7. As the look-ahead is not `PLUS` either, there is nothing to shift here either.
+8. As `e` is the root symbol, and the look-ahead is the end-of-file marker, you are done.
+
+This bottom-up operation may seem strange to you, but in general is more powerful and can also lead to more descriptive error messages than top-down parsing. You can see at which times it uses the look-ahead to decide the next step. You can also imagine that if you had actual numbers and were implementing some toy calculator, this bottom-up approach would allow you to evaluate parts of the expression before you have parsed the whole expression. The manual has [details on the algorithm](http://www.gnu.org/software/bison/manual/html_node/Algorithm.html).
+
+[Bison / Flex processes tokens in reverse order](https://stackoverflow.com/questions/14867679/bison-flex-processes-tokens-in-reverse-order)
 
 ## Elaborator(Semantic Analysis, 语义分析)[^ela]
 
@@ -497,6 +634,8 @@ https://github.com/JuliaHubOSS/llvm-cbe
 
 ## 教程
 
+[Regular-Expressions.info](https://www.regular-expressions.info/)
+
 [Flex(scanner)/Bison(parser)词法语法分析工作原理 - 知乎](https://zhuanlan.zhihu.com/p/120812270)
 
 [Flex & Bison | 张东轩的博客](https://www.zhangdongxuan.com/2018/09/09/Flex-Bison/)
@@ -553,5 +692,6 @@ https://github.com/JuliaHubOSS/llvm-cbe
 [^par]: 颇多用 syntax 修饰的，还有叫 Grammar Analysis 的, 讲道理 grammar 才是该译作“语法/文法”的。
 [^op]: [flex & bison](https://web.iitd.ac.in/~sumeet/flex__bison.pdf) P60
 [^op_p&a]: [Flex and Bison Tutorial](https://www.capsl.udel.edu/courses/cpeg421/2012/slides/Tutorial-Flex_Bison.pdf) P44, 45
+[^rec]: [flex & bison](https://web.iitd.ac.in/~sumeet/flex__bison.pdf) P66 P156
 [^ela]: http://staff.ustc.edu.cn/~bjhua/courses/compiler/2014/labs/lab2/index.html
 [^gre]: https://westes.github.io/flex/manual/Matching.html
