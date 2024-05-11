@@ -1002,18 +1002,22 @@ YY_RULE_SETUP
      * https://stackoverflow.com/questions/73767676/flex-cant-handle-eof-in-action-or-how-to
      * https://stackoverflow.com/questions/23555786/match-eof-but-go-to-endless-loop-in-flex
      * https://stackoverflow.com/questions/6614834/lex-flex-scanning-for-the-eof-character
+     * https://github.com/westes/flex/issues/212
+     * https://github.com/westes/flex/issues/548
+     * https://github.com/westes/flex/issues/448
+     * https://github.com/westes/flex/issues/444
      */
 case 31:
 YY_RULE_SETUP
-#line 158 "MyFlex.l"
+#line 162 "MyFlex.l"
 { yyerror("Mystery character %c\n", *yytext); }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 159 "MyFlex.l"
+#line 163 "MyFlex.l"
 ECHO;
 	YY_BREAK
-#line 1016 "lex.yy.c"
+#line 1020 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2030,6 +2034,6 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 159 "MyFlex.l"
+#line 163 "MyFlex.l"
 
 

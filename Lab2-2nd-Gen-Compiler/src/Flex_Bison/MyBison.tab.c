@@ -463,7 +463,7 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  4
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   125
+#define YYLAST   134
 
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  26
@@ -522,9 +522,9 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,   114,   114,   114,   115,   115,   119,   120,   143,   144,
-     151,   152,   155,   156,   157,   158,   159,   160,   161,   162,
-     163,   164,   165,   166,   167
+       0,   109,   109,   109,   110,   110,   117,   118,   142,   143,
+     150,   151,   154,   155,   156,   157,   158,   159,   160,   161,
+     162,   163,   164,   165,   166
 };
 #endif
 
@@ -568,13 +568,13 @@ yysymbol_name (yysymbol_kind_t yysymbol)
    STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-      -5,    -3,     6,    33,   -20,    31,    34,   -20,    30,    46,
-      47,   108,    52,   106,    97,     4,    76,    95,   108,    98,
-       4,     4,   -20,   -20,     4,    15,    96,   -20,   -20,   -20,
-      32,    48,    60,     4,     4,     4,     4,     4,     4,     4,
-       4,     4,     4,   -20,   -20,   100,   -20,    99,   -20,    71,
-      79,    86,    92,    -6,    18,    18,   -20,   -20,   -20,   108,
-     -20,   102,   -20
+      -5,    -3,    73,   -11,   -20,     3,    81,   -20,    96,   100,
+     115,   113,   120,   116,   106,     9,   123,     2,   -20,   107,
+       9,     9,   -20,   -20,     9,    21,   104,   -20,   -20,   -20,
+      37,    53,    65,     9,     9,     9,     9,     9,     9,     9,
+       9,     9,     9,   -20,   -20,   108,   -20,   109,   -20,    76,
+      84,    91,    97,    42,    24,    24,   -20,   -20,   -20,   113,
+     -20,    22,   -20
 };
 
 /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -594,7 +594,7 @@ static const yytype_int8 yydefact[] =
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -20,   -20,   -20,   -20,   -18,   -20,   -19
+     -20,   -20,   -20,   -20,    72,   -17,   -19
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
@@ -608,36 +608,38 @@ static const yytype_int8 yydefgoto[] =
    number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int8 yytable[] =
 {
-      28,    30,    31,     1,     3,    32,     4,    22,    23,    38,
-      39,    40,    41,    42,    49,    50,    51,    52,    53,    54,
-      55,    56,    57,    58,    24,    33,    34,    35,    36,    37,
-      38,    39,    40,    41,    42,    40,    41,    42,     8,     6,
-      43,    61,    33,    34,    35,    36,    37,    38,    39,    40,
-      41,    42,     7,     5,    10,    12,    19,    46,    33,    34,
-      35,    36,    37,    38,    39,    40,    41,    42,    11,    47,
-      33,    34,    35,    36,    37,    38,    39,    40,    41,    42,
-      26,    48,    34,    35,    36,    37,    38,    39,    40,    41,
-      42,    35,    36,    37,    38,    39,    40,    41,    42,    36,
-      37,    38,    39,    40,    41,    42,    37,    38,    39,    40,
-      41,    42,    13,    14,    15,    20,    16,    21,    27,    29,
-       0,    44,    59,     0,    60,    62
+      28,    30,    31,     1,     3,    32,    13,    14,    15,     5,
+      16,     6,    22,    23,    49,    50,    51,    52,    53,    54,
+      55,    56,    57,    58,     7,    27,    13,    14,    15,    24,
+      16,    33,    34,    35,    36,    37,    38,    39,    40,    41,
+      42,    40,    41,    42,    28,    62,    43,    33,    34,    35,
+      36,    37,    38,    39,    40,    41,    42,    38,    39,    40,
+      41,    42,    46,    33,    34,    35,    36,    37,    38,    39,
+      40,    41,    42,     4,    47,    33,    34,    35,    36,    37,
+      38,    39,    40,    41,    42,     8,    48,    34,    35,    36,
+      37,    38,    39,    40,    41,    42,    35,    36,    37,    38,
+      39,    40,    41,    42,    36,    37,    38,    39,    40,    41,
+      42,    37,    38,    39,    40,    41,    42,    13,    14,    15,
+      10,    16,    11,    12,    19,    20,    21,    26,    29,    44,
+      59,    61,     0,     0,    60
 };
 
 static const yytype_int8 yycheck[] =
 {
-      18,    20,    21,     8,     7,    24,     0,     3,     4,    15,
-      16,    17,    18,    19,    33,    34,    35,    36,    37,    38,
-      39,    40,    41,    42,    20,    10,    11,    12,    13,    14,
-      15,    16,    17,    18,    19,    17,    18,    19,     4,     8,
-      25,    59,    10,    11,    12,    13,    14,    15,    16,    17,
-      18,    19,    21,    20,    24,     8,     4,    25,    10,    11,
-      12,    13,    14,    15,    16,    17,    18,    19,    22,    21,
-      10,    11,    12,    13,    14,    15,    16,    17,    18,    19,
-       4,    21,    11,    12,    13,    14,    15,    16,    17,    18,
-      19,    12,    13,    14,    15,    16,    17,    18,    19,    13,
-      14,    15,    16,    17,    18,    19,    14,    15,    16,    17,
-      18,    19,     4,     5,     6,     9,     8,    20,    23,    21,
-      -1,    25,    22,    -1,    25,    23
+      17,    20,    21,     8,     7,    24,     4,     5,     6,    20,
+       8,     8,     3,     4,    33,    34,    35,    36,    37,    38,
+      39,    40,    41,    42,    21,    23,     4,     5,     6,    20,
+       8,    10,    11,    12,    13,    14,    15,    16,    17,    18,
+      19,    17,    18,    19,    61,    23,    25,    10,    11,    12,
+      13,    14,    15,    16,    17,    18,    19,    15,    16,    17,
+      18,    19,    25,    10,    11,    12,    13,    14,    15,    16,
+      17,    18,    19,     0,    21,    10,    11,    12,    13,    14,
+      15,    16,    17,    18,    19,     4,    21,    11,    12,    13,
+      14,    15,    16,    17,    18,    19,    12,    13,    14,    15,
+      16,    17,    18,    19,    13,    14,    15,    16,    17,    18,
+      19,    14,    15,    16,    17,    18,    19,     4,     5,     6,
+      24,     8,    22,     8,     4,     9,    20,     4,    21,    25,
+      22,    59,    -1,    -1,    25
 };
 
 /* YYSTOS[STATE-NUM] -- The symbol kind of the accessing symbol of
@@ -646,7 +648,7 @@ static const yytype_int8 yystos[] =
 {
        0,     8,    27,     7,     0,    20,     8,    21,     4,    28,
       24,    22,     8,     4,     5,     6,     8,    30,    31,     4,
-       9,    20,     3,     4,    20,    32,     4,    23,    30,    21,
+       9,    20,     3,     4,    20,    32,     4,    23,    31,    21,
       32,    32,    32,    10,    11,    12,    13,    14,    15,    16,
       17,    18,    19,    25,    25,    29,    25,    21,    21,    32,
       32,    32,    32,    32,    32,    32,    32,    32,    32,    22,
@@ -1130,139 +1132,139 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* $@1: %empty  */
-#line 114 "MyBison.y"
+#line 109 "MyBison.y"
                            {genpreamble();}
-#line 1136 "MyBison.tab.c"
+#line 1138 "MyBison.tab.c"
     break;
 
   case 3: /* program: INT MAIN '(' ')' $@1 '{' stmts '}'  */
-#line 114 "MyBison.y"
+#line 109 "MyBison.y"
                                                             {}
-#line 1142 "MyBison.tab.c"
+#line 1144 "MyBison.tab.c"
     break;
 
   case 4: /* $@2: %empty  */
-#line 115 "MyBison.y"
+#line 110 "MyBison.y"
                                              {genpreamble(); addlocal((yyvsp[-4].s)); addlocal((yyvsp[-1].s));}
-#line 1148 "MyBison.tab.c"
+#line 1150 "MyBison.tab.c"
     break;
 
   case 5: /* program: INT MAIN '(' INT ID ',' INT ID ')' $@2 '{' stmts '}'  */
-#line 115 "MyBison.y"
+#line 110 "MyBison.y"
                                                                                                         {}
-#line 1154 "MyBison.tab.c"
+#line 1156 "MyBison.tab.c"
     break;
 
   case 6: /* stmts: stmt  */
-#line 119 "MyBison.y"
+#line 117 "MyBison.y"
                     {}
-#line 1160 "MyBison.tab.c"
+#line 1162 "MyBison.tab.c"
     break;
 
-  case 7: /* stmts: stmt stmts  */
-#line 120 "MyBison.y"
+  case 7: /* stmts: stmts stmt  */
+#line 118 "MyBison.y"
                     {}
-#line 1166 "MyBison.tab.c"
+#line 1168 "MyBison.tab.c"
     break;
 
   case 8: /* stmt: INT ID ';'  */
-#line 143 "MyBison.y"
+#line 142 "MyBison.y"
                          { var_declaration((yyvsp[-1].s)); }
-#line 1172 "MyBison.tab.c"
+#line 1174 "MyBison.tab.c"
     break;
 
   case 9: /* stmt: ID '=' exp ';'  */
-#line 144 "MyBison.y"
+#line 143 "MyBison.y"
                          { assignment_statement((yyvsp[-3].s), (yyvsp[-1].a)); }
-#line 1178 "MyBison.tab.c"
+#line 1180 "MyBison.tab.c"
     break;
 
   case 10: /* stmt: PRINTLN_INT '(' exp ')' ';'  */
-#line 151 "MyBison.y"
+#line 150 "MyBison.y"
                                    { println_int_statement((yyvsp[-2].a)); }
-#line 1184 "MyBison.tab.c"
+#line 1186 "MyBison.tab.c"
     break;
 
   case 11: /* stmt: RETURN exp ';'  */
-#line 152 "MyBison.y"
+#line 151 "MyBison.y"
                             { return_statement((yyvsp[-1].a)); }
-#line 1190 "MyBison.tab.c"
+#line 1192 "MyBison.tab.c"
     break;
 
   case 12: /* exp: exp '*' exp  */
-#line 155 "MyBison.y"
+#line 154 "MyBison.y"
                   { (yyval.a) = mkastnode('*', (yyvsp[-2].a), (yyvsp[0].a), 0); }
-#line 1196 "MyBison.tab.c"
+#line 1198 "MyBison.tab.c"
     break;
 
   case 13: /* exp: exp '/' exp  */
-#line 156 "MyBison.y"
+#line 155 "MyBison.y"
                   { (yyval.a) = mkastnode('/', (yyvsp[-2].a), (yyvsp[0].a), 0); }
-#line 1202 "MyBison.tab.c"
+#line 1204 "MyBison.tab.c"
     break;
 
   case 14: /* exp: exp '%' exp  */
-#line 157 "MyBison.y"
+#line 156 "MyBison.y"
                   { (yyval.a) = mkastnode('%', (yyvsp[-2].a), (yyvsp[0].a), 0); }
-#line 1208 "MyBison.tab.c"
+#line 1210 "MyBison.tab.c"
     break;
 
   case 15: /* exp: exp '+' exp  */
-#line 158 "MyBison.y"
+#line 157 "MyBison.y"
                   { (yyval.a) = mkastnode('+', (yyvsp[-2].a), (yyvsp[0].a), 0); }
-#line 1214 "MyBison.tab.c"
+#line 1216 "MyBison.tab.c"
     break;
 
   case 16: /* exp: exp '-' exp  */
-#line 159 "MyBison.y"
+#line 158 "MyBison.y"
                   { (yyval.a) = mkastnode('-', (yyvsp[-2].a), (yyvsp[0].a), 0); }
-#line 1220 "MyBison.tab.c"
+#line 1222 "MyBison.tab.c"
     break;
 
   case 17: /* exp: exp LGTE exp  */
-#line 160 "MyBison.y"
+#line 159 "MyBison.y"
                    { (yyval.a) = mkastnode((yyvsp[-1].fn), (yyvsp[-2].a), (yyvsp[0].a), 0); }
-#line 1226 "MyBison.tab.c"
+#line 1228 "MyBison.tab.c"
     break;
 
   case 18: /* exp: exp EQN exp  */
-#line 161 "MyBison.y"
+#line 160 "MyBison.y"
                   { (yyval.a) = mkastnode((yyvsp[-1].fn), (yyvsp[-2].a), (yyvsp[0].a), 0); }
-#line 1232 "MyBison.tab.c"
+#line 1234 "MyBison.tab.c"
     break;
 
   case 19: /* exp: exp '&' exp  */
-#line 162 "MyBison.y"
+#line 161 "MyBison.y"
                   { (yyval.a) = mkastnode('&', (yyvsp[-2].a), (yyvsp[0].a), 0); }
-#line 1238 "MyBison.tab.c"
+#line 1240 "MyBison.tab.c"
     break;
 
   case 20: /* exp: exp '^' exp  */
-#line 163 "MyBison.y"
+#line 162 "MyBison.y"
                   { (yyval.a) = mkastnode('^', (yyvsp[-2].a), (yyvsp[0].a), 0); }
-#line 1244 "MyBison.tab.c"
+#line 1246 "MyBison.tab.c"
     break;
 
   case 21: /* exp: exp '|' exp  */
-#line 164 "MyBison.y"
+#line 163 "MyBison.y"
                   { (yyval.a) = mkastnode('|', (yyvsp[-2].a), (yyvsp[0].a), 0); }
-#line 1250 "MyBison.tab.c"
+#line 1252 "MyBison.tab.c"
     break;
 
   case 22: /* exp: '(' exp ')'  */
-#line 165 "MyBison.y"
+#line 164 "MyBison.y"
                   { (yyval.a) = (yyvsp[-1].a); }
-#line 1256 "MyBison.tab.c"
+#line 1258 "MyBison.tab.c"
     break;
 
   case 23: /* exp: INTLIT  */
-#line 166 "MyBison.y"
+#line 165 "MyBison.y"
              { (yyval.a) = mkastleaf(A_INTLIT, (yyvsp[0].intval)); }
-#line 1262 "MyBison.tab.c"
+#line 1264 "MyBison.tab.c"
     break;
 
   case 24: /* exp: ID  */
-#line 167 "MyBison.y"
+#line 166 "MyBison.y"
          {
         // Check that this identifier exists
         int id = findlocal((yyvsp[0].s));
@@ -1271,11 +1273,11 @@ yyreduce:
         // Make a leaf AST node for it
         (yyval.a) = mkastleaf(A_IDENT, id);
         }
-#line 1275 "MyBison.tab.c"
+#line 1277 "MyBison.tab.c"
     break;
 
 
-#line 1279 "MyBison.tab.c"
+#line 1281 "MyBison.tab.c"
 
       default: break;
     }
@@ -1468,5 +1470,5 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 190 "MyBison.y"
+#line 189 "MyBison.y"
 

@@ -19,8 +19,6 @@
 /*
  * The %union construct, as its name suggests, is used to
  * create a C language union declaration for symbol values.
- * a, which is a pointer to an AST,
- * and num, which is a long long int.
  */
 
 %union {
@@ -106,9 +104,6 @@ stmt: IF exp THEN list { $$ = newflow('I', $2, $4, NULL); }
  * are numbered $1, $2, and so forth, up to the number of
  * symbols in the rule. */
 
-// Bison handles left recursion much
-// more efficiently than right recursion.
-
 // Using Mid-Rule Actions
 // https://www.gnu.org/software/bison/manual/html_node/Using-Mid_002dRule-Actions.html
 program : INT MAIN '(' ')' {genpreamble();} '{' stmts '}'   {}
@@ -116,8 +111,12 @@ program : INT MAIN '(' ')' {genpreamble();} '{' stmts '}'   {}
 ;
 
 // Parse one or more statements
+// Bison handles left recursion much more efficiently than right recursion.
+
+// I was totally messing up with so-called left-recursion and right-recursion.
 stmts   : stmt      {}
-        | stmt stmts{}
+        | stmts stmt{}  // left-recursive
+        //| stmt stmts{}// right-recursive
 ;
 
 // warning: type clash on default action

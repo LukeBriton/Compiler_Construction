@@ -117,6 +117,13 @@ void genAST(struct ASTnode *n) {
         cout<<"addiu $sp, $sp, "<<offset<<endl;
     
     // 中间变量入栈
+    /*
+     * Despite its name, add immediate unsigned (addiu) is used
+     * to add constants to signed integers when we don't care about
+     * overflow. MIPS has no subtract immediate instruction, and
+     * negative numbers need sign extension, so the MIPS architects 
+     * decided to sign-extend the immediate field.
+     */
     cout<<"addiu $sp, $sp, -4"<<endl;
     cout<<"sw $t2, 0($sp)"<<endl;
 }

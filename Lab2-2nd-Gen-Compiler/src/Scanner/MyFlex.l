@@ -152,6 +152,10 @@
      * https://stackoverflow.com/questions/73767676/flex-cant-handle-eof-in-action-or-how-to
      * https://stackoverflow.com/questions/23555786/match-eof-but-go-to-endless-loop-in-flex
      * https://stackoverflow.com/questions/6614834/lex-flex-scanning-for-the-eof-character
+     * https://github.com/westes/flex/issues/212
+     * https://github.com/westes/flex/issues/548
+     * https://github.com/westes/flex/issues/448
+     * https://github.com/westes/flex/issues/444
      */
 
 .           { yyerror("Mystery character %c\n", *yytext); }
