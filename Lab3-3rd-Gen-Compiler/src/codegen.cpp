@@ -84,3 +84,6 @@ void cgloadlocal(char *identifier) {
 void cgstorlocal(int r, char *identifier) {
     
 }
+
+// error: no newline at end of file [-Werror,-Wnewline-eof]
+// https://stackoverflow.com/questions/5813311/whats-the-significance-of-the-no-newline-at-end-of-file-log

@@ -1,5 +1,8 @@
+SET(CMAKE_C_COMPILER "/usr/bin/clang")
+SET(CMAKE_CXX_COMPILER "/usr/bin/clang++")
+
 cmake_minimum_required(VERSION 3.16)
-project(lab02)
+project(lab03)
 set(CMAKE_CXX_STANDARD 17)
 
 include(FindFLEX)
@@ -18,8 +21,8 @@ endif()
 include_directories(${CMAKE_SOURCE_DIR})
 include_directories(${CMAKE_BINARY_DIR})
 
-FLEX_TARGET(MyLexer lexer.l  ${CMAKE_CURRENT_BINARY_DIR}/lexer.cpp)
-BISON_TARGET(MyParser grammar.y ${CMAKE_CURRENT_BINARY_DIR}/parser.cpp)
+FLEX_TARGET(MyLexer MyFlex.l  ${CMAKE_CURRENT_BINARY_DIR}/lexer.cpp)
+BISON_TARGET(MyParser MyBison.y ${CMAKE_CURRENT_BINARY_DIR}/parser.cpp)
 ADD_FLEX_BISON_DEPENDENCY(MyLexer MyParser)
 
 set(Options
@@ -33,7 +36,7 @@ set(Options
     -Wno-error=unused-parameter
     -Wno-error=unused-private-field
     -Wno-error=unreachable-code-break
-    -Wno-unsafe-buffer-usage
+    # -Wno-unsafe-buffer-usage
 
     -Wno-unused-value
     -Wno-unused-parameter
@@ -66,9 +69,13 @@ target_compile_features(parserlib PRIVATE cxx_std_17)
 target_compile_options(parserlib PRIVATE -Wall -Wpedantic)
 add_executable(Compilerlab3
     main.cpp
-    utils.cpp
-    CodeGen.cpp
+    stmt.cpp
+    ast.cpp
+    symtab.cpp
+    gen.cpp
+    codegen.cpp 
 )
 target_compile_features(Compilerlab3 PRIVATE cxx_std_17)
 target_compile_options(Compilerlab3 PRIVATE ${Options})
 target_link_libraries(Compilerlab3 parserlib)
+

@@ -25,3 +25,6 @@ struct ASTnode {
         int id;			// For A_IDENT, the symbol slot number
     } v;
 };
+
+// error: no newline at end of file [-Werror,-Wnewline-eof]
+// https://stackoverflow.com/questions/5813311/whats-the-significance-of-the-no-newline-at-end-of-file-log

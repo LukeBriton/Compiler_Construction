@@ -20,8 +20,10 @@ using std::endl;
 //      ;
 
 void println_int_statement(struct ASTnode *exp) {
-    struct ASTnode *tree;
-    int reg;
+    // struct ASTnode *tree;
+    // error: unused variable 'tree' [-Werror,-Wunused-variable]
+    // int reg;
+    // error: unused variable 'reg' [-Werror,-Wunused-variable]
 
     // 处理表达式
     if(exp->op == A_INTLIT)
@@ -95,3 +97,6 @@ void return_statement(struct ASTnode *exp)
     cout<<"li $v0, 10"<<endl;
     cout<<"syscall"<<endl;
 }
+
+// error: no newline at end of file [-Werror,-Wnewline-eof]
+// https://stackoverflow.com/questions/5813311/whats-the-significance-of-the-no-newline-at-end-of-file-log

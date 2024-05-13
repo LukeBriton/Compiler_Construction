@@ -65,3 +65,6 @@ void return_statement(struct ASTnode *exp);
 // sym.cpp
 int findlocal(const char* name);
 int addlocal(const char* name);
+
+// error: no newline at end of file [-Werror,-Wnewline-eof]
+// https://stackoverflow.com/questions/5813311/whats-the-significance-of-the-no-newline-at-end-of-file-log

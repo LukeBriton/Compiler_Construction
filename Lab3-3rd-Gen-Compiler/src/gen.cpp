@@ -131,3 +131,6 @@ void genAST(struct ASTnode *n) {
 void genpreamble() {
     cgpreamble();
 }
+
+// error: no newline at end of file [-Werror,-Wnewline-eof]
+// https://stackoverflow.com/questions/5813311/whats-the-significance-of-the-no-newline-at-end-of-file-log
