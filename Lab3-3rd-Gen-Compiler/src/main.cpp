@@ -9,10 +9,7 @@
  */
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <stdarg.h>
-#include <string.h>
-#include <math.h>
 #include "declare.h"
 #include "defs.h"
 

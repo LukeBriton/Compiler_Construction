@@ -1,8 +1,11 @@
 #include <iostream>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
+#include <string>
+
+// So I don't have to include headers in .cpps
+// wherever cout, string, endl etc. are used
+// https://stackoverflow.com/questions/3943352/where-to-put-include-statements-header-or-source
+// https://stackoverflow.com/questions/16821763/where-should-i-include-header-files-in-the-cpp-or-in-the-h-file
+// https://stackoverflow.com/questions/2679373/include-headers-in-header-file
 
 // Structure and enum definitions
 // Copyright (c) 2019 Warren Toomey, GPL3

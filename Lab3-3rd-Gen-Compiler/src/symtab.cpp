@@ -1,7 +1,6 @@
 #include "defs.h"
 #include "declare.h"
 #include <unordered_map>
-#include <string>
 
 // 封装方式全部模仿
 // Symbol table functions
