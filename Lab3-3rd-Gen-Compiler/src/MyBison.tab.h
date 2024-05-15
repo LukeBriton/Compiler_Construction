@@ -60,8 +60,11 @@ extern int yydebug;
     RETURN = 261,                  /* RETURN  */
     MAIN = 262,                    /* MAIN  */
     INT = 263,                     /* INT  */
-    EQN = 264,                     /* EQN  */
-    LGTE = 265                     /* LGTE  */
+    LOR = 264,                     /* LOR  */
+    LAND = 265,                    /* LAND  */
+    EQN = 266,                     /* EQN  */
+    LGTE = 267,                    /* LGTE  */
+    UMINUS = 268                   /* UMINUS  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -77,7 +80,7 @@ union YYSTYPE
     const char* s; /* which symbol */
     int fn; /* which function */
 
-#line 81 "MyBison.tab.h"
+#line 84 "MyBison.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

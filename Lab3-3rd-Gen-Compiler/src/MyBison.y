@@ -55,14 +55,17 @@
 /* https://en.cppreference.com/w/c/language/operator_precedence */
 /* lower */
 %right '='
+%left LOR       // ||
+%left LAND      // &&
 %left '|'
 %left '^'
 %left '&'
-%left <fn> EQN
-%left <fn> LGTE // 理论上可以细分
+%left <fn> EQN  // == !=
+%left <fn> LGTE // < <= > >=
 %left '+' '-'
 %left '*' '/' '%'
-//%nonassoc UMINUS
+%right UMINUS '!' '~'
+// https://stackoverflow.com/questions/12961351/does-it-make-sense-for-unary-operators-to-be-associative
 /* higher */
 
 %type <a> exp
@@ -161,6 +164,11 @@ exp : exp '*' exp { $$ = mkastnode('*', $1, $3, 0); }
     | exp '&' exp { $$ = mkastnode('&', $1, $3, 0); }
     | exp '^' exp { $$ = mkastnode('^', $1, $3, 0); }
     | exp '|' exp { $$ = mkastnode('|', $1, $3, 0); }
+    | exp LAND exp { $$ = mkastnode(A_LAND, $1, $3, 0); }
+    | exp LOR exp { $$ = mkastnode(A_LOR, $1, $3, 0); }
+    | '-' exp %prec UMINUS { $$ = mkastunary(A_UMINUS, $2, 0); }
+    | '!' exp { $$ = mkastunary('!', $2, 0); }
+    | '~' exp { $$ = mkastunary('~', $2, 0); }
     | '(' exp ')' { $$ = $2; }
     | INTLIT { $$ = mkastleaf(A_INTLIT, $1); }
     | ID {
@@ -171,9 +179,6 @@ exp : exp '*' exp { $$ = mkastnode('*', $1, $3, 0); }
         // Make a leaf AST node for it
         $$ = mkastleaf(A_IDENT, id);
         }
-
-    //| '-' exp %prec UMINUS { $$ = newast('M', $2, NULL); }
-    // 其实负数已经含在 NUMBER 里了，但是对于 '-' ID 的情况，仍然需要处理
 
     // 之前一直没有捋明白这计算器里的变量。
     // 现在看来，看上去是只能在一个 stmt 里用。

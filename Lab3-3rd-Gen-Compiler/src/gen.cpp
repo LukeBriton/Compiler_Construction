@@ -107,7 +107,26 @@ void genAST(struct ASTnode *n) {
         case A_EQ:
             cgeq();
             break;
-            
+
+        // Logical
+        case A_LAND:
+            cgland();
+            break;
+        case A_LOR:
+            cglor();
+            break;
+
+        // Unary
+        case A_UMINUS:
+            cgneg();
+            break;
+        case '!':
+            cglnot();
+            break;
+        case '~':
+            cgnot();
+            break;
+
         case A_INTLIT:
             return;
         case A_IDENT:

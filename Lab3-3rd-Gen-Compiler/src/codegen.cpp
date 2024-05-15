@@ -74,6 +74,24 @@ void cgeq() {
 }
 
 // TODO
+void cgland() {
+    cout<<"land"<<endl;
+}
+void cglor() {
+    cout<<"lor"<<endl;
+}
+
+void cgneg() {
+    cout<<"neg"<<endl;
+}
+void cglnot() {
+    cout<<"lnot"<<endl;
+}
+void cgnot() {
+    cout<<"not"<<endl;
+}
+
+// TODO
 // stmt.cpp 中其实应该调用此处接口来着。
 void cgloadint(int value) {
     

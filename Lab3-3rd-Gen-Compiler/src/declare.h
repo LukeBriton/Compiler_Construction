@@ -51,6 +51,13 @@ void cgle(void);
 void cgneq(void);
 void cgeq(void);
 
+void cgland(void);
+void cglor(void);
+
+void cgneg(void);
+void cglnot(void);
+void cgnot(void);
+
 void cgprintln_int(int r);
 void cgloadint(int value);
 void cgloadlocal(char *identifier);

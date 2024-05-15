@@ -14,6 +14,8 @@
 // with the related tokens
 enum {
     A_GT = 1, A_LT, A_GE, A_LE, A_NEQ, A_EQ,
+    A_LAND, A_LOR,
+    A_UMINUS,
     A_INTLIT,
     A_IDENT
 };

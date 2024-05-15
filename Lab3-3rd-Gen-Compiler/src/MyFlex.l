@@ -75,8 +75,10 @@
 "%" |
 "=" |
 "&" |
-"|" |
 "^" |
+"|" |
+"!" |
+"~" |
 "(" |
 ")" |
 "{" |
@@ -84,7 +86,7 @@
 "," |
 ";" { return yytext[0]; }
 
-    /* comparison ops, all are a CMP token */
+    /* comparison ops, all are either LGTE or EQN */
     /* Higher Precedence */
 ">" { yylval.fn = 1; return LGTE; }
 "<" { yylval.fn = 2; return LGTE; }
@@ -94,6 +96,10 @@
 "!=" { yylval.fn = 5; return EQN; }
 "==" { yylval.fn = 6; return EQN; }
 
+    /* logical ops */
+    /* Logical NOT "!" 归在单字符算子里 */
+"&&" { return LAND; }
+"||" { return LOR; }
 
 
     /* built-in functions */
