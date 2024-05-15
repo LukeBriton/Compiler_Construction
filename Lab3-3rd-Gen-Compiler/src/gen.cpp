@@ -59,58 +59,61 @@ void genAST(struct ASTnode *n) {
         }
     }
 
-    switch (n->op) {
-    case '+':
-        cgadd();
-        break;
-    case '-':
-        cgsub();
-        break;
-    case '*':
-        cgmul();
-        break;
-    case '/':
-        cgdiv();
-        break;
-    case '&':
-        cgand();
-        break;
-    case '|':
-        cgor();
-        break;
-    case '^':
-        cgxor();
-        break;
-    case '%':
-        cgmod();
-        break;
-    //CMP
-    //LGTE
-    case A_GT:
-        cggt();
-        break;
-    case A_LT:
-        cglt();
-        break;
-    case A_GE:
-        cgge();
-        break;
-    case A_LE:
-        cgle();
-        break;
-    //EQN
-    case A_NEQ:
-        cgneq();
-        break;
-    case A_EQ:
-        cgeq();
-        break;
-    case A_INTLIT:
-        return;
-    case A_IDENT:
-        return;
-    default:
-        yyerror("Unknown AST operator");
+    switch (n->op)
+    {
+        case '+':
+            cgadd();
+            break;
+        case '-':
+            cgsub();
+            break;
+        case '*':
+            cgmul();
+            break;
+        case '/':
+            cgdiv();
+            break;
+        case '&':
+            cgand();
+            break;
+        case '|':
+            cgor();
+            break;
+        case '^':
+            cgxor();
+            break;
+        case '%':
+            cgmod();
+            break;
+
+        //CMP
+        //LGTE
+        case A_GT:
+            cggt();
+            break;
+        case A_LT:
+            cglt();
+            break;
+        case A_GE:
+            cgge();
+            break;
+        case A_LE:
+            cgle();
+            break;
+        //EQN
+        case A_NEQ:
+            cgneq();
+            break;
+        case A_EQ:
+            cgeq();
+            break;
+            
+        case A_INTLIT:
+            return;
+        case A_IDENT:
+            return;
+        default:
+            yyerror("Unknown AST operator");
     }
 
     if(offset)
