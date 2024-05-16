@@ -498,7 +498,7 @@ Contrary to top-down (LL) parsers, which do not support left recursion, bottom-u
 
 [Left-recursive versus right-recursive lists in LR parsers](https://gallium.inria.fr/blog/lr-lists)
 
-[Practical Considerations for LALR(1) Grammars](http://lambda.uta.edu/cse5317/spring03/notes/node21.html)
+[Practical Considerations for LALR(1) Grammars](https://lambda.uta.edu/cse5317/notes/node21.html)
 
 [Right recursion versus left recursion
 ](https://www.ibm.com/docs/en/zos/3.1.0?topic=topics-right-recursion-versus-left-recursion)
