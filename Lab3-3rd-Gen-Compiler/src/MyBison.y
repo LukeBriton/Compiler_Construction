@@ -109,8 +109,15 @@ stmt: IF exp THEN list { $$ = newflow('I', $2, $4, NULL); }
 
 // Using Mid-Rule Actions
 // https://www.gnu.org/software/bison/manual/html_node/Using-Mid_002dRule-Actions.html
-program : INT MAIN '(' ')' {genpreamble();} '{' stmts '}'   {}
-        | INT MAIN '(' INT ID ',' INT ID ')' {genpreamble(); addlocal($5); addlocal($8);} '{' stmts '}' {}
+program : INT MAIN '(' ')' { genpreamble(); } '{' stmts '}'   {}
+        | INT MAIN '(' INT ID ',' INT ID ')' { genpreamble(); addlocal($8); addlocal($5); } '{' stmts '}' {}
+        // The names are just a well-established convention
+        // https://stackoverflow.com/questions/11489387/is-it-compulsory-to-write-int-mainint-argc-char-argv-cant-use-some-other
+        // Reverse Order of Arguments
+        // https://stackoverflow.com/questions/31100614/why-is-order-of-function-arguments-reversed
+        // https://stackoverflow.com/questions/27979376/what-does-it-mean-when-they-say-arguments-are-pushed-in-the-reverse-order
+        // https://stackoverflow.com/questions/67868615/why-do-arguments-to-a-function-get-filled-up-in-registers-in-reverse-order-in-c
+        // https://stackoverflow.com/questions/621542/do-compilers-take-advantage-of-the-indeterminate-sequencing-of-function-argument
 ;
 
 // Parse one or more statements
