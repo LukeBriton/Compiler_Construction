@@ -127,6 +127,20 @@ void genAST(struct ASTnode *n) {
             cgnot();
             break;
 
+        // 函数确实需要跟其他 op 一样将结果入栈
+        case A_FUNC:
+            // 总是有种把参数列表当作函数子树的想法，
+            // 而实际上函数是叶子，offset 一直为 0
+            // 所以不用担心“子树”位于栈中，
+            // 应该能够用 cgfunccall 把入栈的操作处理好。
+            arglist_output();
+            cgfunccall(n->v.intvalue);
+            // break; 
+            // 用 break 的话，就不要在 cgfuncall 中 addiu $sp, $sp, -4，
+            // 但是需要留着 cgfuncall 里存入 $t2 的代码
+            return;
+            // 之前误用成 return; 导致下方代码无法执行。 // 但怎么现在来看，还是得用 return;
+            // 现在不用纠结了，用 return 就行。
         case A_INTLIT:
             return;
         case A_IDENT:
@@ -154,5 +168,16 @@ void genpreamble() {
     cgpreamble();
 }
 
+void genfuncpreamble(const char* name, int type) {
+    cgfuncpreamble(name, type);
+}
+
+void genmainpreamble() {
+    cgmainpreamble();
+}
+
+void genfuncpostamble() {
+    cgfuncpostamble();
+}
 // error: no newline at end of file [-Werror,-Wnewline-eof]
 // https://stackoverflow.com/questions/5813311/whats-the-significance-of-the-no-newline-at-end-of-file-log

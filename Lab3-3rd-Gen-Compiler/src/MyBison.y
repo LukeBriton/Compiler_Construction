@@ -14,6 +14,9 @@
 #include <string.h>
 #include "defs.h"
 #include "declare.h"
+int arg_num = 0; // 可以方便 arg_pass
+int para_num = 0; // 方便 para_declaration
+int scope = 0; // 我们在此约定，scope = 0 是 func， scope = 1 是 main。
 %}
 
 /*
@@ -32,16 +35,13 @@
 
 %token <intval> INTLIT
 %token <s> ID
-
-
-// %token <fn> FUNC
 %token PRINTLN_INT
 // %token CRLF
 
 // %token IF THEN ELSE WHILE DO 
 %token RETURN MAIN
 
-%token INT
+%token INT VOID
 
 
 
@@ -69,7 +69,7 @@
 /* higher */
 
 %type <a> exp
-//%type <sl> symlist
+
 %start program
 
 /* 
@@ -107,10 +107,26 @@ stmt: IF exp THEN list { $$ = newflow('I', $2, $4, NULL); }
  * are numbered $1, $2, and so forth, up to the number of
  * symbols in the rule. */
 
+
+// https://stackoverflow.com/questions/24025119/right-recursive-grammar-or-left-recursive
+program : { genpreamble(); } procedure      {}
+        | program  procedure                {}  // left-recursive
+
 // Using Mid-Rule Actions
 // https://www.gnu.org/software/bison/manual/html_node/Using-Mid_002dRule-Actions.html
-program : INT MAIN '(' ')' { genpreamble(); } '{' stmts '}'   {}
-        | INT MAIN '(' INT ID ',' INT ID ')' { genpreamble(); addlocal($8); addlocal($5); } '{' stmts '}' {}
+// C allows you to call your main function (while C++ does not )
+// https://stackoverflow.com/questions/4238179/calling-main-in-main-in-c
+// https://en.wikibooks.org/wiki/C_Programming/Procedures_and_functions
+// 不考虑 VOID 类型 return; 和 INT 类型没有 return 的情况。
+// 总之，只考虑正确输入。
+// 繁冗，待优化。
+procedure   : VOID ID '(' { scope = 0; genfuncpreamble($2, P_VOID); } ')' '{' stmts '}'          {genfuncpostamble();}
+            | VOID ID '(' { scope = 0; genfuncpreamble($2, P_VOID); para_num = 0; } paralist ')' '{' stmts '}' {genfuncpostamble();}
+            | INT ID '(' { scope = 0; genfuncpreamble($2, P_INT); } ')' '{' stmts '}'            {genfuncpostamble();}
+            | INT ID '(' { scope = 0; genfuncpreamble($2, P_INT); para_num = 0; } paralist ')' '{' stmts '}'   {genfuncpostamble();}
+            | INT MAIN '(' ')' { scope = 1; genmainpreamble(); } '{' stmts '}'   {}
+            | INT MAIN '(' INT ID ',' INT ID ')' { scope = 1; genmainpreamble(); addlocal($8); addlocal($5); } '{' stmts '}' {}
+
         // The names are just a well-established convention
         // https://stackoverflow.com/questions/11489387/is-it-compulsory-to-write-int-mainint-argc-char-argv-cant-use-some-other
         // Reverse Order of Arguments
@@ -120,13 +136,29 @@ program : INT MAIN '(' ')' { genpreamble(); } '{' stmts '}'   {}
         // https://stackoverflow.com/questions/621542/do-compilers-take-advantage-of-the-indeterminate-sequencing-of-function-argument
 ;
 
+// int a, int b, int c, int d
+// $fp + 8, $fp + 12, $fp + 16, $fp + 20... （$fp的位置是 旧$sp）
+// https://stackoverflow.com/questions/14647018/a-notation-for-empty-right-hand-sides-of-rules
+// https://stackoverflow.com/questions/156767/whats-the-difference-between-an-argument-and-a-parameter
+// 不考虑初始化
+// 某种关于参数个数的想法：一个临时变量，计数，传递给函数。
+// paralist : INT ID { printf("%s\n", $2); var_declaration($2); }
+//          | INT ID ',' paralist { printf("%s\n", $2); var_declaration($2); } // 右递归
+//          // 输出顺序：d, c, b, a 
+// ;
+
+paralist : INT ID { para_num++; /*printf("%s\n", $2);*/ para_declaration($2, para_num); /*printf("%d\n", findlocal($2));*/ }
+         | paralist ',' INT ID { para_num++; /*printf("%s\n", $4);*/ para_declaration($4, para_num); /*printf("%d\n", findlocal($4));*/ } // 左递归
+         // 输出顺序：a, b, c, d 
+; 
+
 // Parse one or more statements
 // Bison handles left recursion much more efficiently than right recursion.
 
 // I was totally messing up with so-called left-recursion and right-recursion.
-stmts   : stmt      {}
-        | stmts stmt{}  // left-recursive
-        //| stmt stmts{}// right-recursive
+stmts   : stmt          {}
+        | stmts stmt    {}  // left-recursive
+        //| stmt stmts  {}  // right-recursive
 ;
 
 // warning: type clash on default action
@@ -149,8 +181,16 @@ stmts   : stmt      {}
  * https://westes.github.io/flex/manual/A-Note-About-yytext-And-Memory.html
  */
 
-stmt : INT ID ';'        { var_declaration($2); }
-     | ID '=' exp ';'    { assignment_statement($1, $3); }
+declarations : INT identifier               {}
+            | declarations ',' identifier   {}
+;
+
+identifier  : ID            { var_declaration($1); }
+            | ID '=' exp    { var_declaration($1); assignment_statement($1, $3); }
+;
+
+stmt : declarations ';'     {}
+     | ID '=' exp ';'       { assignment_statement($1, $3); }
         /* The parser doesn't know which rule to take --until it's
          * parsed the next token to see if it is a '='. By the time
          * the code is executed, yytext has already been overwritten.
@@ -158,8 +198,36 @@ stmt : INT ID ';'        { var_declaration($2); }
          * ID {printf("%s \n\n", $1);} '=' exp ';' {...}
          */
      | PRINTLN_INT '(' exp ')' ';' { println_int_statement($3); }
-     | RETURN exp ';'       { return_statement($2); }
+     | RETURN exp ';'       { return_statement($2, scope); }
+     //| ID '(' { arg_num = 0; } arglist ')' ';' {
+     | ID '(' arglist ')' ';' {
+        // Check that this identifier exists
+        int func = findfunc($1);
+        if (func == -1)
+            yyerror("Unknown function %s", $1);
+        // printf("%s\n", $1);
+        arglist_buf(arg_num);
+        arg_num = 0;
+        arglist_output();
+        if (functype(func) == P_VOID)
+            void_func_call($1);
+        else
+            func_call($1);
+        }
 ;
+
+// 不考虑 arguments 数量与 parameters 不相等的情况
+arglist : exp { arg_num++; /*printf("%d\n", arg_num);*/ /*printf("%d\n", $1->v.intvalue);*/ arg_pass($1); }
+        | exp ',' arglist { arg_num++; /*printf("%d\n", arg_num);*/ /*printf("%d\n", $1->v.intvalue);*/ arg_pass($1); } // 右递归
+        // 这样正好，paralist是从左到右，这样的话可以随着 para_num 而 addpara，
+        // arglist 是从右向左，按照实验说明所给，下移栈顶，将最左的 argument 放在地址最低处。
+;
+// 一个问题是，当在 exp 中 匹配到 ID '(' arglist ')' 时，arg_pass 的语句均已经执行完毕，
+// 之后才构建了一个 FUNC 的 AST 结点，作为一个 exp。
+// 如果出现 test(1, 2) + func(3, 4) 这样的语句，
+// 其首先将参数 2, 1 入栈，这时才算匹配上了一个 exp
+// 此时 func_call 并没有执行，会一直等到整个 AST 全部生成，在遍历的过程中碰到为止。
+// 之后 4, 3 入栈，与前略同。
 
 exp : exp '*' exp { $$ = mkastnode('*', $1, $3, 0); }
     | exp '/' exp { $$ = mkastnode('/', $1, $3, 0); }
@@ -178,7 +246,26 @@ exp : exp '*' exp { $$ = mkastnode('*', $1, $3, 0); }
     | '~' exp { $$ = mkastunary('~', $2, 0); }
     | '(' exp ')' { $$ = $2; }
     | INTLIT { $$ = mkastleaf(A_INTLIT, $1); }
+    //| ID '(' { arg_num = 0; } arglist ')' { 
+    // 以防止出现这种情况：
+    // b = test( {置0} func( {置0} 1, 2), func( {置0} 3, 4) );
+    //                |---------------------------------->|
+    // 当处理完 func(3, 4) 的内部后，拐回来将两个 func 视为 test 的两个参数，
+    // 但是 test 本身的 {置0} 操作则早早地进行了，arg_num 会保留 func(3, 4)
+    // 的参数个数，再加上匹配 test 得到的两个参数，清理栈时会错误地多出栈两个。
+    | ID '(' arglist ')' {
+        // Check that this identifier exists
+        int func = findfunc($1);
+        if (func == -1)
+            yyerror("Unknown function %s", $1);
+        // Make a leaf AST node for it
+        // printf("%s\n", $1);
+        arglist_buf(arg_num);
+        arg_num = 0;
+        $$ = mkastleaf(A_FUNC, func);
+        }
     | ID {
+        // printf("%s\n", $1);
         // Check that this identifier exists
         int id = findlocal($1);
         if (id == -1)

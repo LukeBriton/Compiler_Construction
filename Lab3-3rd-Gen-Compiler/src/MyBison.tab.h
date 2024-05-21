@@ -60,11 +60,12 @@ extern int yydebug;
     RETURN = 261,                  /* RETURN  */
     MAIN = 262,                    /* MAIN  */
     INT = 263,                     /* INT  */
-    LOR = 264,                     /* LOR  */
-    LAND = 265,                    /* LAND  */
-    EQN = 266,                     /* EQN  */
-    LGTE = 267,                    /* LGTE  */
-    UMINUS = 268                   /* UMINUS  */
+    VOID = 264,                    /* VOID  */
+    LOR = 265,                     /* LOR  */
+    LAND = 266,                    /* LAND  */
+    EQN = 267,                     /* EQN  */
+    LGTE = 268,                    /* LGTE  */
+    UMINUS = 269                   /* UMINUS  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -73,14 +74,14 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 24 "MyBison.y"
+#line 27 "MyBison.y"
 
     struct ASTnode *a;
     int intval;
     const char* s; /* which symbol */
     int fn; /* which function */
 
-#line 84 "MyBison.tab.h"
+#line 85 "MyBison.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
