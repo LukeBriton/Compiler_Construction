@@ -27,7 +27,7 @@
  */
 #include <string.h>
 #include "MyBison.tab.h"
-#include "Declare.h"
+#include "declare.h"
 %}
 
 /* 以下是规则部分，在规则部分写注释不能顶格写 */
@@ -61,6 +61,7 @@
     /* 怀疑之后有必要统一设为 Type，*/
     /* 依靠 yylval 区分具体类型 */
 "int" { return INT; }
+"void" { return VOID; }
 
 
     /* 操作符： =、 +、 -、 *、 / */
