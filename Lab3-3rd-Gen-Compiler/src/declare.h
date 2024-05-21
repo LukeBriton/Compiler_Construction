@@ -27,7 +27,9 @@ struct ASTnode *mkastunary(int op, struct ASTnode *left, int intvalue);
 // gen.cpp
 void genAST(struct ASTnode *n);
 void genpreamble();
-void genprintln_int(int reg);
+void genfuncpreamble(const char* name, int type);
+void genmainpreamble();
+void genfuncpostamble();
 
 // cg.cpp
 void freeall_registers(void);
@@ -59,6 +61,11 @@ void cglnot(void);
 void cgnot(void);
 
 void cgprintln_int(int r);
+void cgfuncpreamble(const char* name, int type);
+void cgmainpreamble(void);
+void cgfuncpostamble(void);
+void cgfunccall(int value);
+
 void cgloadint(int value);
 void cgloadlocal(char *identifier);
 void cgstorlocal(int r, char *identifier);
@@ -66,12 +73,25 @@ void cgstorlocal(int r, char *identifier);
 // stmt.cpp
 void println_int_statement(struct ASTnode *exp);
 void var_declaration(const char* name);
+void para_declaration(const char* name, int para_num);
 void assignment_statement(const char* name, struct ASTnode *exp);
-void return_statement(struct ASTnode *exp);
+void return_statement(struct ASTnode *exp, int scope);
+void arg_pass(struct ASTnode *exp);
+int get_arg_num(void);
+void arglist_buf(int arg_num);
+void arglist_output(void);
+void void_func_call(const char* name);
+void func_call(const char* name);
 
-// sym.cpp
+// symtab.cpp
 int findlocal(const char* name);
 int addlocal(const char* name);
+int addpara(const char* name, int para_num);
+void clearlocal(void);
+int findfunc(const char* name);
+int functype(int value);
+std::string funcname(int value);
+int addfunc(const char* name, int type);
 
 // error: no newline at end of file [-Werror,-Wnewline-eof]
 // https://stackoverflow.com/questions/5813311/whats-the-significance-of-the-no-newline-at-end-of-file-log
