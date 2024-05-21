@@ -17,7 +17,18 @@ enum {
     A_LAND, A_LOR,
     A_UMINUS,
     A_INTLIT,
-    A_IDENT
+    A_IDENT,
+    A_FUNC
+};
+
+// Primitive types
+enum {
+    P_INT, P_VOID
+};
+
+// Structural types
+enum {
+    S_VAR, S_FUNC
 };
 
 // Abstract Syntax Tree structure
@@ -27,8 +38,30 @@ struct ASTnode {
     struct ASTnode *right;
     union {
         int intvalue;		// For A_INTLIT, the integer value
-        int id;			// For A_IDENT, the symbol slot number
+                        	// For A_IDENT, the symbol slot number
+                            // For A_FUNC, the symbol slot number
     } v;
+};
+
+// https://stackoverflow.com/questions/612328/difference-between-struct-and-typedef-struct-in-c
+// https://stackoverflow.com/questions/31269728/string-in-struct
+// https://softwareengineering.stackexchange.com/questions/306774/how-to-create-constructors-for-structures-in-c
+struct symbol {
+    std::string name;
+    int type;
+    int stype;
+
+    symbol(std::string n, int t, int s) : name(n), type(t), stype(s) {}
+
+    // error: no match for 'operator<' (operand types are 'const symbol' and 'const symbol')
+    // https://stackoverflow.com/questions/41911931/operator-overloading-of-c-stl-map-with-custom-classes
+    bool operator<(const symbol& other) const {
+        if (name < other.name)
+            return name < other.name;
+        if (type < other.type)
+            return type < other.type;
+        return stype < other.stype;
+    }
 };
 
 // error: no newline at end of file [-Werror,-Wnewline-eof]
