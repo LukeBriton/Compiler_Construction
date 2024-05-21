@@ -1,0 +1,28 @@
+cmake_minimum_required(VERSION 3.16)
+project(lab03)
+set(CMAKE_CXX_STANDARD 17)
+
+# 添加多个包含目录
+include_directories(
+    ${CMAKE_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/include  # 假设你有一个名为 'include' 的目录
+    /usr/local/include          # 另一个常用的包含目录
+    ${CMAKE_CURRENT_BINARY_DIR}
+)
+
+add_compile_options(-pedantic)
+# 可选择的 Sanitize 检查（如果需要开启内存检查，取消注释以下两行）
+# add_compile_options(-fsanitize=address)
+# add_link_options(-fsanitize=address)
+
+# 生成可执行文件
+add_executable(Compilerlab3
+    main.cpp
+    stmt.cpp
+    ast.cpp
+    symtab.cpp
+    gen.cpp
+    codegen.cpp
+    lex.yy.cpp
+    MyBison.tab.cpp
+)
