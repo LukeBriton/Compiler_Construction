@@ -1,20 +1,20 @@
 # Lab2 -> Lab3 改造方案大纲
 
-1. - [ ] Type: `int`, `void`
+1. - [x] Type: `int`, `void`
 
 2. Function:
 
-   - [ ] Definition
+   - [x] Definition
   
-   - [ ] Arguments
+   - [x] Parametres, Arguments
 
-   - [ ] Return Value, as an Expression, e.g. `a = add(1, 2) + mul(3, 4);` 
+   - [x] Return Value, as an Expression, e.g. `a = add(1, 2) + mul(3, 4);` 
   
 3. Operator:
 
-   - [ ] Unary: `-`, `!`, `~` [Arithmetic operators](https://en.cppreference.com/w/c/language/operator_arithmetic)
+   - [x] Unary: `-`, `!`, `~` [Arithmetic operators](https://en.cppreference.com/w/c/language/operator_arithmetic)
 
-   - [ ] Binary: `&&`, `||` [Logical operators](https://en.cppreference.com/w/c/language/operator_logical)
+   - [x] Binary: `&&`, `||` [Logical operators](https://en.cppreference.com/w/c/language/operator_logical)
    
    - [ ] Assignment: Return Lvalue, e.g. `a = b = c = 0;` (Optional)
          
@@ -26,8 +26,8 @@
 
 4. Variable Declaration:
 
-   - [ ] Multiple Variables
+   - [x] Multiple Variables
 
-   - [ ] Initialisation [Initialization](https://en.cppreference.com/w/c/language/initialization)
+   - [x] Initialisation [Initialization](https://en.cppreference.com/w/c/language/initialization)
 
-5. - [x] Return: Constant, Variable, Expression (Done in Reconstructed Lab2)
+5. - [x] Return: Constant, Variable, Expression (Done in **Refactored** Lab2)

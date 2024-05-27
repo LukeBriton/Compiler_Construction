@@ -452,6 +452,10 @@ MyBison.y: note: rerun with option '-Wcounterexamples' to generate conflict coun
 
 ### [Mid-Rule](https://www.gnu.org/software/bison/manual/html_node/Using-Mid_002dRule-Actions.html)
 
+[Bison mid rule actions are not working](https://stackoverflow.com/questions/50968469/bison-mid-rule-actions-are-not-working)
+
+[Conflicts due to Mid-Rule Actions](https://www.gnu.org/software/bison/manual/html_node/Mid_002dRule-Conflicts.html)
+
 ### Recursive Rules
 
 **⚠️Deprecated⚠️** "explanation" by ChatGPT 4, an exercise to judge its correctness:（其连 left-recursive 还是 right-recursive 都没搞明白）
