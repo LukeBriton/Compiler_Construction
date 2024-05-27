@@ -35,7 +35,7 @@ enum {
 struct ASTnode {
     int op;			// "Operation" to be performed on this tree
     struct ASTnode *left;		// Left and right child trees
-    struct ASTnode *right;
+    struct ASTnode *right;      // 若为 unary，则只有左子树。
     union {
         int intvalue;		// For A_INTLIT, the integer value
                         	// For A_IDENT, the symbol slot number
@@ -51,8 +51,10 @@ struct symbol {
     int type;
     int stype;
 
+    // 构造函数 用以存入新的 symbol
     symbol(std::string n, int t, int s) : name(n), type(t), stype(s) {}
 
+    // 重载小于运算符 提供给 map
     // error: no match for 'operator<' (operand types are 'const symbol' and 'const symbol')
     // https://stackoverflow.com/questions/41911931/operator-overloading-of-c-stl-map-with-custom-classes
     bool operator<(const symbol& other) const {

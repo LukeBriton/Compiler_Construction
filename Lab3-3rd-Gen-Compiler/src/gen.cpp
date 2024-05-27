@@ -8,12 +8,11 @@ using std::cout;
 using std::endl;
 
 // Given an AST, generate assembly code recursively.
-// Return the register id with the tree's final value
 void genAST(struct ASTnode *n) {
 
-    // Get the left and right sub-tree values
-
     int offset = 0; // 给存放到栈内的中间变量分配的空间
+
+    // Get the left and right sub-tree values
 
     // 此处是从显式用栈的版本改造而来
     // 当初的代码是：

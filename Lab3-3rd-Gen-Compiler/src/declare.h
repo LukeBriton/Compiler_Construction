@@ -87,10 +87,10 @@ void func_call(const char* name);
 int findlocal(const char* name);
 int addlocal(const char* name);
 int addpara(const char* name, int para_num);
-void clearlocal(void);
+void clearlocal(void);						// 用于各函数代码生成后，其作用域中局部变量（含形参）的清理。
 int findfunc(const char* name);
 int functype(int value);
-std::string funcname(int value);
+std::string funcname(int value);			// 用于 AST 中作为表达式的函数调用
 int addfunc(const char* name, int type);
 
 // error: no newline at end of file [-Werror,-Wnewline-eof]

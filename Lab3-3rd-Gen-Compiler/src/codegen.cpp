@@ -154,6 +154,7 @@ void cgfuncpostamble()
 }
 
 void cgmainpreamble() {
+    // 暂时不考虑调用 main 函数的情况
     clearlocal();
     cout<<".globl main # 声明 main 函数为全局符号，使得模拟器能识别程序的入口点"<<endl<<endl;
     cout<<"main:"<<endl;

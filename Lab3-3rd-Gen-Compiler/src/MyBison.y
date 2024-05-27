@@ -114,6 +114,8 @@ program : { genpreamble(); } procedure      {}
 
 // Using Mid-Rule Actions
 // https://www.gnu.org/software/bison/manual/html_node/Using-Mid_002dRule-Actions.html
+// https://stackoverflow.com/questions/50968469/bison-mid-rule-actions-are-not-working
+// https://www.gnu.org/software/bison/manual/html_node/Mid_002dRule-Conflicts.html
 // C allows you to call your main function (while C++ does not )
 // https://stackoverflow.com/questions/4238179/calling-main-in-main-in-c
 // https://en.wikibooks.org/wiki/C_Programming/Procedures_and_functions
@@ -247,21 +249,21 @@ exp : exp '*' exp { $$ = mkastnode('*', $1, $3, 0); }
     | '(' exp ')' { $$ = $2; }
     | INTLIT { $$ = mkastleaf(A_INTLIT, $1); }
     //| ID '(' { arg_num = 0; } arglist ')' { 
-    // 以防止出现这种情况：
+    // 不采用以上这种，以预防这种情况：
     // b = test( {置0} func( {置0} 1, 2), func( {置0} 3, 4) );
     //                |---------------------------------->|
     // 当处理完 func(3, 4) 的内部后，拐回来将两个 func 视为 test 的两个参数，
     // 但是 test 本身的 {置0} 操作则早早地进行了，arg_num 会保留 func(3, 4)
-    // 的参数个数，再加上匹配 test 得到的两个参数，清理栈时会错误地多出栈两个。
+    // 的参数个数，再加上匹配 test 得到的两个参数，清理栈时会错误地多出栈了两个。
     | ID '(' arglist ')' {
         // Check that this identifier exists
         int func = findfunc($1);
         if (func == -1)
             yyerror("Unknown function %s", $1);
-        // Make a leaf AST node for it
         // printf("%s\n", $1);
         arglist_buf(arg_num);
         arg_num = 0;
+        // Make a leaf AST node for it
         $$ = mkastleaf(A_FUNC, func);
         }
     | ID {
