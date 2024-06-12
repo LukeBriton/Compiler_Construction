@@ -1,0 +1,47 @@
+cmake_minimum_required(VERSION 3.16)
+project(lab04)
+set(CMAKE_CXX_STANDARD 17)
+
+include(FindFLEX)
+include(FindBISON)
+if(FLEX_FOUND)
+    message("Info: flex found!")
+else()
+    message("Error: flex not found!")
+endif()
+if(BISON_FOUND)
+    message("Info: bison found!")
+else()
+    message("Error: bison not found!")
+endif()
+
+# 添加多个包含目录
+include_directories(${CMAKE_SOURCE_DIR})
+include_directories(${CMAKE_BINARY_DIR})
+
+FLEX_TARGET(MyLexer MyFlex.l  ${CMAKE_CURRENT_BINARY_DIR}/lexer.cpp)
+BISON_TARGET(MyParser MyBison.y ${CMAKE_CURRENT_BINARY_DIR}/parser.cpp)
+ADD_FLEX_BISON_DEPENDENCY(MyLexer MyParser)
+
+add_compile_options(-pedantic)
+# 可选择的 Sanitize 检查（如果需要开启内存检查，取消注释以下两行）
+add_compile_options(-fsanitize=address)
+add_link_options(-fsanitize=address)
+add_library(parserlib # no Werror for ${FLEX_MyLexer_OUTPUTS} ${BISON_MyParser_OUTPUTS}\
+    ${FLEX_MyLexer_OUTPUTS} ${BISON_MyParser_OUTPUTS}
+)
+target_compile_features(parserlib PRIVATE cxx_std_17)
+target_compile_options(parserlib PRIVATE -Wall -Wpedantic)
+
+# 生成可执行文件
+add_executable(Compilerlab4
+    main.cpp
+    stmt.cpp
+    ast.cpp
+    symtab.cpp
+    gen.cpp
+    codegen.cpp 
+)
+target_compile_features(Compilerlab4 PRIVATE cxx_std_17)
+target_compile_options(Compilerlab4 PRIVATE ${Options})
+target_link_libraries(Compilerlab4 parserlib)
