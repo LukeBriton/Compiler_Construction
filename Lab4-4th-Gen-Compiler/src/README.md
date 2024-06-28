@@ -19,6 +19,7 @@ src
 │  └─ e08.ans
 ├─ ast.cpp		# AST 结构
 ├─ build.sh						# Build on Linux
+├─ build_run.cmd					# Build & Run on Windows
 ├─ cases						# 样例文件夹
 │  ├─ e01.c
 │  ├─ e02.c
@@ -34,7 +35,7 @@ src
 ├─ gen.cpp		# 泛用代码生成
 ├─ lex.yy.c						# ⚠ 自动生成，无须手动修改
 ├─ main.cpp		# 主函数，程序入口
-├─ run.cmd						# Build & Run on Windows
+├─ run.cmd						# Run on Windows
 ├─ stmt.cpp		# 语句相关代码生成
 └─ symtab.cpp		# 符号表，变量、函数相关
 ```
