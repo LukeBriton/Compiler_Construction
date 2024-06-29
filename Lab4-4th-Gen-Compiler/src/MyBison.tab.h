@@ -74,7 +74,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 27 "MyBison.y"
+#line 28 "MyBison.y"
 
     struct ASTnode *a;
     int intval;

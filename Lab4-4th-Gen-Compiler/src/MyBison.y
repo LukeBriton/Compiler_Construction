@@ -14,9 +14,10 @@
 #include <string.h>
 #include "defs.h"
 #include "declare.h"
-int arg_num = 0; // 可以方便 arg_pass
-int para_num = 0; // 方便 para_declaration
-int is_main = 0; // 只在返回时有用，为 0 是一般 func，为 1 是 main。
+int arg_num = 0;    // 可以方便 arg_pass
+// int para_num = 0;// 方便 para_declaration -> 被 symtab.cpp Index_para 取代
+int is_main = 0;    // 只在返回时有用，为 0 是一般 func，为 1 是 main。
+int scope = 0;      // scope 为当前作用域序号，从 0 开始，0 即为默认函数作用域。
 %}
 
 /*
@@ -123,9 +124,9 @@ program : { genpreamble(); } procedure      {}
 // 总之，只考虑正确输入。
 // 繁冗，待优化。
 procedure   : VOID ID '(' { is_main = 0; genfuncpreamble($2, P_VOID); } ')' '{' stmts '}'          {genfuncpostamble();}
-            | VOID ID '(' { is_main = 0; genfuncpreamble($2, P_VOID); para_num = 0; } paralist ')' '{' stmts '}' {genfuncpostamble();}
+            | VOID ID '(' { is_main = 0; genfuncpreamble($2, P_VOID); /*para_num = 0;*/ } paralist ')' '{' stmts '}' {genfuncpostamble();}
             | INT ID '(' { is_main = 0; genfuncpreamble($2, P_INT); } ')' '{' stmts '}'            {genfuncpostamble();}
-            | INT ID '(' { is_main = 0; genfuncpreamble($2, P_INT); para_num = 0; } paralist ')' '{' stmts '}'   {genfuncpostamble();}
+            | INT ID '(' { is_main = 0; genfuncpreamble($2, P_INT); /*para_num = 0;*/ } paralist ')' '{' stmts '}'   {genfuncpostamble();}
             | INT MAIN '(' ')' { is_main = 1; genmainpreamble(); } '{' stmts '}'   {}
             | INT MAIN '(' INT ID ',' INT ID ')' { is_main = 1; genmainpreamble(); addlocal($8); addlocal($5); } '{' stmts '}' {}
 
@@ -149,8 +150,8 @@ procedure   : VOID ID '(' { is_main = 0; genfuncpreamble($2, P_VOID); } ')' '{' 
 //          // 输出顺序：d, c, b, a 
 // ;
 
-paralist : INT ID { para_num++; /*printf("%s\n", $2);*/ para_declaration($2, para_num); /*printf("%d\n", findlocal($2));*/ }
-         | paralist ',' INT ID { para_num++; /*printf("%s\n", $4);*/ para_declaration($4, para_num); /*printf("%d\n", findlocal($4));*/ } // 左递归
+paralist : INT ID { /*para_num++;*/ /*printf("%s\n", $2);*/ para_declaration($2);/*, para_num);*/ /*printf("%d\n", findlocal($2));*/ }
+         | paralist ',' INT ID { /*para_num++;*/ /*printf("%s\n", $4);*/ para_declaration($4);/*, para_num);*/ /*printf("%d\n", findlocal($4));*/ } // 左递归
          // 输出顺序：a, b, c, d 
 ; 
 
@@ -191,7 +192,9 @@ identifier  : ID            { var_declaration($1); }
             | ID '=' exp    { var_declaration($1); assignment_statement($1, $3); }
 ;
 
+// 仅有成对花括号的情形尚未支持。
 stmt : declarations ';'     {}
+     | '{' { scope++; pass_scope(scope); /*printf("%d\n", scope);*/ } stmts { scope--; pass_scope(scope); /*printf("%d\n", scope);*/ } '}'        {}
      | ID '=' exp ';'       { assignment_statement($1, $3); }
         /* The parser doesn't know which rule to take --until it's
          * parsed the next token to see if it is a '='. By the time
@@ -215,10 +218,7 @@ stmt : declarations ';'     {}
         arglist_buf(arg_num);
         arg_num = 0;
         arglist_output();
-        if (functype(func) == P_VOID)
-            void_func_call($1);
-        else
-            func_call($1);
+        func_call($1);
         }
 ;
 

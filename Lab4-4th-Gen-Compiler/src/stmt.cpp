@@ -62,8 +62,8 @@ void var_declaration(const char* name) {
     addlocal(name);
 }
 
-void para_declaration(const char* name, int para_num) {
-    addpara(name, para_num);
+void para_declaration(const char* name) {
+    addpara(name);
 }
 
 void assignment_statement(const char* name, struct ASTnode *exp) {
@@ -194,17 +194,11 @@ void arglist_output()
     arglistbufs.pop();
 }
 
-void void_func_call(const char* name)
-{
-    cout<<"jal " << name << " # 调用函数"<<endl;
-    cout<<"addiu $sp, $sp, " << 4 * arg_num << " # 清理栈" <<endl;
-}
-
 void func_call(const char* name)
 {
     cout<<"jal " << name << " # 调用函数"<<endl;
     cout<<"addiu $sp, $sp, " << 4 * arg_num << " # 清理栈" <<endl;
-    // 考虑到返回值没有赋予的对象，也没必要再将 $v0 存在栈顶了
+    // 考虑到返回值没有赋予的对象，不管 void 还是别的都一样
 }
 
 // error: no newline at end of file [-Werror,-Wnewline-eof]

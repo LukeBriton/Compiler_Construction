@@ -73,7 +73,7 @@ void cgstorlocal(int r, char *identifier);
 // stmt.cpp
 void println_int_statement(struct ASTnode *exp);
 void var_declaration(const char* name);
-void para_declaration(const char* name, int para_num);
+void para_declaration(const char* name);
 void assignment_statement(const char* name, struct ASTnode *exp);
 void return_statement(struct ASTnode *exp);
 void exit_syscall(void);
@@ -81,13 +81,13 @@ void arg_pass(struct ASTnode *exp);
 int get_arg_num(void);
 void arglist_buf(int arg_num);
 void arglist_output(void);
-void void_func_call(const char* name);
 void func_call(const char* name);
 
 // symtab.cpp
 int findlocal(const char* name);
 int addlocal(const char* name);
-int addpara(const char* name, int para_num);
+int addpara(const char* name);
+void pass_scope(int scope);
 void clearlocal(void);						// 用于各函数代码生成后，其作用域中局部变量（含形参）的清理。
 int findfunc(const char* name);
 int functype(int value);
