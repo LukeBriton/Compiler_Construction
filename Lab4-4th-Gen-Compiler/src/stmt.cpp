@@ -91,7 +91,7 @@ void assignment_statement(const char* name, struct ASTnode *exp) {
     cout<<"sw $v0, "<<-4*id<<"($fp)"<<endl;
 }
 
-void return_statement(struct ASTnode *exp, int scope)
+void return_statement(struct ASTnode *exp)
 {
 
     // 处理表达式
@@ -108,14 +108,13 @@ void return_statement(struct ASTnode *exp, int scope)
         genAST(exp);
         cout<<"lw $v0, 0($sp)"<<endl;
     }
-    
-    if(scope == 1)
-    {
-        cout<<"move $v1, $v0"<<endl;
-        cout<<"li $v0, 10"<<endl;
-        cout<<"syscall"<<endl;
-    }
+}
 
+void exit_syscall()
+{
+    cout<<"move $v1, $v0"<<endl; // Seems useless, usage unknown.
+    cout<<"li $v0, 10"<<endl;
+    cout<<"syscall"<<endl;
 }
 
 void arg_pass(struct ASTnode *exp)

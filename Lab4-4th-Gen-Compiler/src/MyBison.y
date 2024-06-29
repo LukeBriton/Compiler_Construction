@@ -16,7 +16,7 @@
 #include "declare.h"
 int arg_num = 0; // 可以方便 arg_pass
 int para_num = 0; // 方便 para_declaration
-int scope = 0; // 我们在此约定，scope = 0 是 func， scope = 1 是 main。
+int is_main = 0; // 只在返回时有用，为 0 是一般 func，为 1 是 main。
 %}
 
 /*
@@ -122,12 +122,12 @@ program : { genpreamble(); } procedure      {}
 // 不考虑 VOID 类型 return; 和 INT 类型没有 return 的情况。
 // 总之，只考虑正确输入。
 // 繁冗，待优化。
-procedure   : VOID ID '(' { scope = 0; genfuncpreamble($2, P_VOID); } ')' '{' stmts '}'          {genfuncpostamble();}
-            | VOID ID '(' { scope = 0; genfuncpreamble($2, P_VOID); para_num = 0; } paralist ')' '{' stmts '}' {genfuncpostamble();}
-            | INT ID '(' { scope = 0; genfuncpreamble($2, P_INT); } ')' '{' stmts '}'            {genfuncpostamble();}
-            | INT ID '(' { scope = 0; genfuncpreamble($2, P_INT); para_num = 0; } paralist ')' '{' stmts '}'   {genfuncpostamble();}
-            | INT MAIN '(' ')' { scope = 1; genmainpreamble(); } '{' stmts '}'   {}
-            | INT MAIN '(' INT ID ',' INT ID ')' { scope = 1; genmainpreamble(); addlocal($8); addlocal($5); } '{' stmts '}' {}
+procedure   : VOID ID '(' { is_main = 0; genfuncpreamble($2, P_VOID); } ')' '{' stmts '}'          {genfuncpostamble();}
+            | VOID ID '(' { is_main = 0; genfuncpreamble($2, P_VOID); para_num = 0; } paralist ')' '{' stmts '}' {genfuncpostamble();}
+            | INT ID '(' { is_main = 0; genfuncpreamble($2, P_INT); } ')' '{' stmts '}'            {genfuncpostamble();}
+            | INT ID '(' { is_main = 0; genfuncpreamble($2, P_INT); para_num = 0; } paralist ')' '{' stmts '}'   {genfuncpostamble();}
+            | INT MAIN '(' ')' { is_main = 1; genmainpreamble(); } '{' stmts '}'   {}
+            | INT MAIN '(' INT ID ',' INT ID ')' { is_main = 1; genmainpreamble(); addlocal($8); addlocal($5); } '{' stmts '}' {}
 
         // The names are just a well-established convention
         // https://stackoverflow.com/questions/11489387/is-it-compulsory-to-write-int-mainint-argc-char-argv-cant-use-some-other
@@ -200,7 +200,11 @@ stmt : declarations ';'     {}
          * ID {printf("%s \n\n", $1);} '=' exp ';' {...}
          */
      | PRINTLN_INT '(' exp ')' ';' { println_int_statement($3); }
-     | RETURN exp ';'       { return_statement($2, scope); }
+     | RETURN exp ';'       {
+        return_statement($2);
+        if (is_main == 1)
+            exit_syscall();
+        }
      //| ID '(' { arg_num = 0; } arglist ')' ';' {
      | ID '(' arglist ')' ';' {
         // Check that this identifier exists

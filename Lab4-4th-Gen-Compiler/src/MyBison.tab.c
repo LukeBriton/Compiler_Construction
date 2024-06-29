@@ -76,7 +76,7 @@
 #include "declare.h"
 int arg_num = 0; // 可以方便 arg_pass
 int para_num = 0; // 方便 para_declaration
-int scope = 0; // 我们在此约定，scope = 0 是 func， scope = 1 是 main。
+int is_main = 0; // 只在返回时有用，为 0 是一般 func，为 1 是 main。
 
 #line 82 "MyBison.tab.c"
 
@@ -541,12 +541,12 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,   112,   112,   112,   113,   123,   123,   124,   124,   125,
-     125,   126,   126,   127,   127,   128,   128,   150,   151,   159,
-     160,   184,   185,   188,   189,   192,   193,   200,   201,   203,
-     220,   221,   232,   233,   234,   235,   236,   237,   238,   239,
-     240,   241,   242,   243,   244,   245,   246,   247,   248,   256,
-     267
+       0,   112,   112,   112,   113,   125,   125,   126,   126,   127,
+     127,   128,   128,   129,   129,   130,   130,   152,   153,   161,
+     162,   186,   187,   190,   191,   194,   195,   202,   203,   209,
+     226,   227,   238,   239,   240,   241,   242,   243,   244,   245,
+     246,   247,   248,   249,   250,   251,   252,   253,   254,   262,
+     273
 };
 #endif
 
@@ -1224,157 +1224,161 @@ yyreduce:
     break;
 
   case 5: /* $@2: %empty  */
-#line 123 "MyBison.y"
-                          { scope = 0; genfuncpreamble((yyvsp[-1].s), P_VOID); }
+#line 125 "MyBison.y"
+                          { is_main = 0; genfuncpreamble((yyvsp[-1].s), P_VOID); }
 #line 1230 "MyBison.tab.c"
     break;
 
   case 6: /* procedure: VOID ID '(' $@2 ')' '{' stmts '}'  */
-#line 123 "MyBison.y"
-                                                                                                 {genfuncpostamble();}
+#line 125 "MyBison.y"
+                                                                                                   {genfuncpostamble();}
 #line 1236 "MyBison.tab.c"
     break;
 
   case 7: /* $@3: %empty  */
-#line 124 "MyBison.y"
-                          { scope = 0; genfuncpreamble((yyvsp[-1].s), P_VOID); para_num = 0; }
+#line 126 "MyBison.y"
+                          { is_main = 0; genfuncpreamble((yyvsp[-1].s), P_VOID); para_num = 0; }
 #line 1242 "MyBison.tab.c"
     break;
 
   case 8: /* procedure: VOID ID '(' $@3 paralist ')' '{' stmts '}'  */
-#line 124 "MyBison.y"
-                                                                                                               {genfuncpostamble();}
+#line 126 "MyBison.y"
+                                                                                                                 {genfuncpostamble();}
 #line 1248 "MyBison.tab.c"
     break;
 
   case 9: /* $@4: %empty  */
-#line 125 "MyBison.y"
-                         { scope = 0; genfuncpreamble((yyvsp[-1].s), P_INT); }
+#line 127 "MyBison.y"
+                         { is_main = 0; genfuncpreamble((yyvsp[-1].s), P_INT); }
 #line 1254 "MyBison.tab.c"
     break;
 
   case 10: /* procedure: INT ID '(' $@4 ')' '{' stmts '}'  */
-#line 125 "MyBison.y"
-                                                                                                 {genfuncpostamble();}
+#line 127 "MyBison.y"
+                                                                                                   {genfuncpostamble();}
 #line 1260 "MyBison.tab.c"
     break;
 
   case 11: /* $@5: %empty  */
-#line 126 "MyBison.y"
-                         { scope = 0; genfuncpreamble((yyvsp[-1].s), P_INT); para_num = 0; }
+#line 128 "MyBison.y"
+                         { is_main = 0; genfuncpreamble((yyvsp[-1].s), P_INT); para_num = 0; }
 #line 1266 "MyBison.tab.c"
     break;
 
   case 12: /* procedure: INT ID '(' $@5 paralist ')' '{' stmts '}'  */
-#line 126 "MyBison.y"
-                                                                                                               {genfuncpostamble();}
+#line 128 "MyBison.y"
+                                                                                                                 {genfuncpostamble();}
 #line 1272 "MyBison.tab.c"
     break;
 
   case 13: /* $@6: %empty  */
-#line 127 "MyBison.y"
-                               { scope = 1; genmainpreamble(); }
+#line 129 "MyBison.y"
+                               { is_main = 1; genmainpreamble(); }
 #line 1278 "MyBison.tab.c"
     break;
 
   case 14: /* procedure: INT MAIN '(' ')' $@6 '{' stmts '}'  */
-#line 127 "MyBison.y"
-                                                                                 {}
+#line 129 "MyBison.y"
+                                                                                   {}
 #line 1284 "MyBison.tab.c"
     break;
 
   case 15: /* $@7: %empty  */
-#line 128 "MyBison.y"
-                                                 { scope = 1; genmainpreamble(); addlocal((yyvsp[-1].s)); addlocal((yyvsp[-4].s)); }
+#line 130 "MyBison.y"
+                                                 { is_main = 1; genmainpreamble(); addlocal((yyvsp[-1].s)); addlocal((yyvsp[-4].s)); }
 #line 1290 "MyBison.tab.c"
     break;
 
   case 16: /* procedure: INT MAIN '(' INT ID ',' INT ID ')' $@7 '{' stmts '}'  */
-#line 128 "MyBison.y"
-                                                                                                                             {}
+#line 130 "MyBison.y"
+                                                                                                                               {}
 #line 1296 "MyBison.tab.c"
     break;
 
   case 17: /* paralist: INT ID  */
-#line 150 "MyBison.y"
+#line 152 "MyBison.y"
                   { para_num++; /*printf("%s\n", $2);*/ para_declaration((yyvsp[0].s), para_num); /*printf("%d\n", findlocal($2));*/ }
 #line 1302 "MyBison.tab.c"
     break;
 
   case 18: /* paralist: paralist ',' INT ID  */
-#line 151 "MyBison.y"
+#line 153 "MyBison.y"
                                { para_num++; /*printf("%s\n", $4);*/ para_declaration((yyvsp[0].s), para_num); /*printf("%d\n", findlocal($4));*/ }
 #line 1308 "MyBison.tab.c"
     break;
 
   case 19: /* stmts: stmt  */
-#line 159 "MyBison.y"
+#line 161 "MyBison.y"
                         {}
 #line 1314 "MyBison.tab.c"
     break;
 
   case 20: /* stmts: stmts stmt  */
-#line 160 "MyBison.y"
+#line 162 "MyBison.y"
                         {}
 #line 1320 "MyBison.tab.c"
     break;
 
   case 21: /* declarations: INT identifier  */
-#line 184 "MyBison.y"
+#line 186 "MyBison.y"
                                             {}
 #line 1326 "MyBison.tab.c"
     break;
 
   case 22: /* declarations: declarations ',' identifier  */
-#line 185 "MyBison.y"
+#line 187 "MyBison.y"
                                             {}
 #line 1332 "MyBison.tab.c"
     break;
 
   case 23: /* identifier: ID  */
-#line 188 "MyBison.y"
+#line 190 "MyBison.y"
                             { var_declaration((yyvsp[0].s)); }
 #line 1338 "MyBison.tab.c"
     break;
 
   case 24: /* identifier: ID '=' exp  */
-#line 189 "MyBison.y"
+#line 191 "MyBison.y"
                             { var_declaration((yyvsp[-2].s)); assignment_statement((yyvsp[-2].s), (yyvsp[0].a)); }
 #line 1344 "MyBison.tab.c"
     break;
 
   case 25: /* stmt: declarations ';'  */
-#line 192 "MyBison.y"
+#line 194 "MyBison.y"
                             {}
 #line 1350 "MyBison.tab.c"
     break;
 
   case 26: /* stmt: ID '=' exp ';'  */
-#line 193 "MyBison.y"
+#line 195 "MyBison.y"
                             { assignment_statement((yyvsp[-3].s), (yyvsp[-1].a)); }
 #line 1356 "MyBison.tab.c"
     break;
 
   case 27: /* stmt: PRINTLN_INT '(' exp ')' ';'  */
-#line 200 "MyBison.y"
+#line 202 "MyBison.y"
                                    { println_int_statement((yyvsp[-2].a)); }
 #line 1362 "MyBison.tab.c"
     break;
 
   case 28: /* stmt: RETURN exp ';'  */
-#line 201 "MyBison.y"
-                            { return_statement((yyvsp[-1].a), scope); }
-#line 1368 "MyBison.tab.c"
+#line 203 "MyBison.y"
+                            {
+        return_statement((yyvsp[-1].a));
+        if (is_main == 1)
+            exit_syscall();
+        }
+#line 1372 "MyBison.tab.c"
     break;
 
   case 29: /* stmt: ID '(' arglist ')' ';'  */
-#line 203 "MyBison.y"
+#line 209 "MyBison.y"
                               {
         // Check that this identifier exists
         int func = findfunc((yyvsp[-4].s));
         if (func == -1)
             yyerror("Unknown function %s", (yyvsp[-4].s));
-        //printf("%s\n", $1);
+        // printf("%s\n", $1);
         arglist_buf(arg_num);
         arg_num = 0;
         arglist_output();
@@ -1383,141 +1387,141 @@ yyreduce:
         else
             func_call((yyvsp[-4].s));
         }
-#line 1387 "MyBison.tab.c"
+#line 1391 "MyBison.tab.c"
     break;
 
   case 30: /* arglist: exp  */
-#line 220 "MyBison.y"
+#line 226 "MyBison.y"
               { arg_num++; /*printf("%d\n", arg_num);*/ /*printf("%d\n", $1->v.intvalue);*/ arg_pass((yyvsp[0].a)); }
-#line 1393 "MyBison.tab.c"
+#line 1397 "MyBison.tab.c"
     break;
 
   case 31: /* arglist: exp ',' arglist  */
-#line 221 "MyBison.y"
+#line 227 "MyBison.y"
                           { arg_num++; /*printf("%d\n", arg_num);*/ /*printf("%d\n", $1->v.intvalue);*/ arg_pass((yyvsp[-2].a)); }
-#line 1399 "MyBison.tab.c"
+#line 1403 "MyBison.tab.c"
     break;
 
   case 32: /* exp: exp '*' exp  */
-#line 232 "MyBison.y"
+#line 238 "MyBison.y"
                   { (yyval.a) = mkastnode('*', (yyvsp[-2].a), (yyvsp[0].a), 0); }
-#line 1405 "MyBison.tab.c"
+#line 1409 "MyBison.tab.c"
     break;
 
   case 33: /* exp: exp '/' exp  */
-#line 233 "MyBison.y"
+#line 239 "MyBison.y"
                   { (yyval.a) = mkastnode('/', (yyvsp[-2].a), (yyvsp[0].a), 0); }
-#line 1411 "MyBison.tab.c"
+#line 1415 "MyBison.tab.c"
     break;
 
   case 34: /* exp: exp '%' exp  */
-#line 234 "MyBison.y"
+#line 240 "MyBison.y"
                   { (yyval.a) = mkastnode('%', (yyvsp[-2].a), (yyvsp[0].a), 0); }
-#line 1417 "MyBison.tab.c"
+#line 1421 "MyBison.tab.c"
     break;
 
   case 35: /* exp: exp '+' exp  */
-#line 235 "MyBison.y"
+#line 241 "MyBison.y"
                   { (yyval.a) = mkastnode('+', (yyvsp[-2].a), (yyvsp[0].a), 0); }
-#line 1423 "MyBison.tab.c"
+#line 1427 "MyBison.tab.c"
     break;
 
   case 36: /* exp: exp '-' exp  */
-#line 236 "MyBison.y"
+#line 242 "MyBison.y"
                   { (yyval.a) = mkastnode('-', (yyvsp[-2].a), (yyvsp[0].a), 0); }
-#line 1429 "MyBison.tab.c"
+#line 1433 "MyBison.tab.c"
     break;
 
   case 37: /* exp: exp LGTE exp  */
-#line 237 "MyBison.y"
+#line 243 "MyBison.y"
                    { (yyval.a) = mkastnode((yyvsp[-1].fn), (yyvsp[-2].a), (yyvsp[0].a), 0); }
-#line 1435 "MyBison.tab.c"
+#line 1439 "MyBison.tab.c"
     break;
 
   case 38: /* exp: exp EQN exp  */
-#line 238 "MyBison.y"
+#line 244 "MyBison.y"
                   { (yyval.a) = mkastnode((yyvsp[-1].fn), (yyvsp[-2].a), (yyvsp[0].a), 0); }
-#line 1441 "MyBison.tab.c"
+#line 1445 "MyBison.tab.c"
     break;
 
   case 39: /* exp: exp '&' exp  */
-#line 239 "MyBison.y"
+#line 245 "MyBison.y"
                   { (yyval.a) = mkastnode('&', (yyvsp[-2].a), (yyvsp[0].a), 0); }
-#line 1447 "MyBison.tab.c"
+#line 1451 "MyBison.tab.c"
     break;
 
   case 40: /* exp: exp '^' exp  */
-#line 240 "MyBison.y"
+#line 246 "MyBison.y"
                   { (yyval.a) = mkastnode('^', (yyvsp[-2].a), (yyvsp[0].a), 0); }
-#line 1453 "MyBison.tab.c"
+#line 1457 "MyBison.tab.c"
     break;
 
   case 41: /* exp: exp '|' exp  */
-#line 241 "MyBison.y"
+#line 247 "MyBison.y"
                   { (yyval.a) = mkastnode('|', (yyvsp[-2].a), (yyvsp[0].a), 0); }
-#line 1459 "MyBison.tab.c"
+#line 1463 "MyBison.tab.c"
     break;
 
   case 42: /* exp: exp LAND exp  */
-#line 242 "MyBison.y"
+#line 248 "MyBison.y"
                    { (yyval.a) = mkastnode(A_LAND, (yyvsp[-2].a), (yyvsp[0].a), 0); }
-#line 1465 "MyBison.tab.c"
+#line 1469 "MyBison.tab.c"
     break;
 
   case 43: /* exp: exp LOR exp  */
-#line 243 "MyBison.y"
+#line 249 "MyBison.y"
                   { (yyval.a) = mkastnode(A_LOR, (yyvsp[-2].a), (yyvsp[0].a), 0); }
-#line 1471 "MyBison.tab.c"
+#line 1475 "MyBison.tab.c"
     break;
 
   case 44: /* exp: '-' exp  */
-#line 244 "MyBison.y"
+#line 250 "MyBison.y"
                            { (yyval.a) = mkastunary(A_UMINUS, (yyvsp[0].a), 0); }
-#line 1477 "MyBison.tab.c"
+#line 1481 "MyBison.tab.c"
     break;
 
   case 45: /* exp: '!' exp  */
-#line 245 "MyBison.y"
+#line 251 "MyBison.y"
               { (yyval.a) = mkastunary('!', (yyvsp[0].a), 0); }
-#line 1483 "MyBison.tab.c"
+#line 1487 "MyBison.tab.c"
     break;
 
   case 46: /* exp: '~' exp  */
-#line 246 "MyBison.y"
+#line 252 "MyBison.y"
               { (yyval.a) = mkastunary('~', (yyvsp[0].a), 0); }
-#line 1489 "MyBison.tab.c"
+#line 1493 "MyBison.tab.c"
     break;
 
   case 47: /* exp: '(' exp ')'  */
-#line 247 "MyBison.y"
+#line 253 "MyBison.y"
                   { (yyval.a) = (yyvsp[-1].a); }
-#line 1495 "MyBison.tab.c"
+#line 1499 "MyBison.tab.c"
     break;
 
   case 48: /* exp: INTLIT  */
-#line 248 "MyBison.y"
+#line 254 "MyBison.y"
              { (yyval.a) = mkastleaf(A_INTLIT, (yyvsp[0].intval)); }
-#line 1501 "MyBison.tab.c"
+#line 1505 "MyBison.tab.c"
     break;
 
   case 49: /* exp: ID '(' arglist ')'  */
-#line 256 "MyBison.y"
+#line 262 "MyBison.y"
                          {
         // Check that this identifier exists
         int func = findfunc((yyvsp[-3].s));
         if (func == -1)
             yyerror("Unknown function %s", (yyvsp[-3].s));
-        // Make a leaf AST node for it
-        //printf("%s\n", $1);
+        // printf("%s\n", $1);
         arglist_buf(arg_num);
         arg_num = 0;
+        // Make a leaf AST node for it
         (yyval.a) = mkastleaf(A_FUNC, func);
         }
-#line 1517 "MyBison.tab.c"
+#line 1521 "MyBison.tab.c"
     break;
 
   case 50: /* exp: ID  */
-#line 267 "MyBison.y"
+#line 273 "MyBison.y"
          {
         // printf("%s\n", $1);
         // Check that this identifier exists
@@ -1527,11 +1531,11 @@ yyreduce:
         // Make a leaf AST node for it
         (yyval.a) = mkastleaf(A_IDENT, id);
         }
-#line 1531 "MyBison.tab.c"
+#line 1535 "MyBison.tab.c"
     break;
 
 
-#line 1535 "MyBison.tab.c"
+#line 1539 "MyBison.tab.c"
 
       default: break;
     }
@@ -1724,5 +1728,5 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 288 "MyBison.y"
+#line 294 "MyBison.y"
 
