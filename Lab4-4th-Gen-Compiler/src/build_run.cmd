@@ -1,6 +1,6 @@
 @echo off
 
-win_bison -d MyBison.y
+win_bison -d -Wcounterexamples MyBison.y
 ::del MyBison.tab.cpp
 ::rename MyBison.tab.c MyBison.tab.cpp
 
