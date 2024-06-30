@@ -1,14 +1,16 @@
 int sum(int x, int y)
 {
+	x = 46;
+	y = 98;
 	int sum;
 	int a = 2;
 	int b = 3;
 	{
 		sum = 0;
-		int z = 5;
-		int p = 6;
+		int a = 5;
+		int b = 6;
 		int q = 7;
-		sum = x*a + y*b + z;
+		a = x*a + y*b;
 	}
 	sum = 8;
 	a = 1;
@@ -31,10 +33,13 @@ int sum(int x, int y)
 	return sum;
 }
 	
-int main()
+int main(int argc, int argv)
 {
+	argc = 192608;
+	argv = 17;
 	int a = 1;
 	int b = 2;
+	int a = 114;
 	{
 		int c = 3;
 		c = a + b;

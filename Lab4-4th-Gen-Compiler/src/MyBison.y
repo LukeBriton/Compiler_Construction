@@ -128,7 +128,7 @@ procedure   : VOID ID '(' { is_main = 0; genfuncpreamble($2, P_VOID); } ')' '{' 
             | INT ID '(' { is_main = 0; genfuncpreamble($2, P_INT); } ')' '{' stmts '}'            {genfuncpostamble();}
             | INT ID '(' { is_main = 0; genfuncpreamble($2, P_INT); /*para_num = 0;*/ } paralist ')' '{' stmts '}'   {genfuncpostamble();}
             | INT MAIN '(' ')' { is_main = 1; genmainpreamble(); } '{' stmts '}'   {}
-            | INT MAIN '(' INT ID ',' INT ID ')' { is_main = 1; genmainpreamble(); addlocal($8); addlocal($5); } '{' stmts '}' {}
+            | INT MAIN '(' INT ID ',' INT ID ')' { is_main = 1; genmainpreamble(); para_declaration($5); para_declaration($8); } '{' stmts '}' {}
 
         // The names are just a well-established convention
         // https://stackoverflow.com/questions/11489387/is-it-compulsory-to-write-int-mainint-argc-char-argv-cant-use-some-other

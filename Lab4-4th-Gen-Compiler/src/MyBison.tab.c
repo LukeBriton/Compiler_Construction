@@ -1290,13 +1290,13 @@ yyreduce:
 
   case 15: /* $@7: %empty  */
 #line 131 "MyBison.y"
-                                                 { is_main = 1; genmainpreamble(); addlocal((yyvsp[-1].s)); addlocal((yyvsp[-4].s)); }
+                                                 { is_main = 1; genmainpreamble(); para_declaration((yyvsp[-4].s)); para_declaration((yyvsp[-1].s)); }
 #line 1295 "MyBison.tab.c"
     break;
 
   case 16: /* procedure: INT MAIN '(' INT ID ',' INT ID ')' $@7 '{' stmts '}'  */
 #line 131 "MyBison.y"
-                                                                                                                               {}
+                                                                                                                                               {}
 #line 1301 "MyBison.tab.c"
     break;
 

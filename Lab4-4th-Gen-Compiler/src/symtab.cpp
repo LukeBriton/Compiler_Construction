@@ -105,6 +105,16 @@ static int Index_func = 0;  // 统计函数个数。
 static int Index_scope = 0; // 当前作用域序号，从 0 开始。
 static int Scope_begin = 0; // 当前作用域首个变量的序号-1，也即此前作用域变量总数
 
+// Must be put before its caller if not declared.
+static int findlocal(std::string name, int scope)
+{
+    auto it = IDs.find(localsym(name, scope));
+    if(it != IDs.end())
+        // // https://stackoverflow.com/questions/15451287/what-does-iterator-second-mean
+        return it->second;
+    return (-1);
+}
+
 // 其实是在 global symtab 之上改的。
 // Determine if the symbol is in the local symbol table.
 // Return its slot position or -1 if not found.
@@ -119,12 +129,11 @@ int findlocal(std::string name) {
     // Time Complexity: O(scope*log N) = O(log N)
 
     int scope = Index_scope;
+    int y;
     do
     {
-        // https://stackoverflow.com/questions/15451287/what-does-iterator-second-mean
-        auto it = IDs.find(localsym(name, scope));
-        if(it != IDs.end())
-            return it->second;
+        if((y = findlocal(name, scope)) != -1)
+            return y;
         scope--;
     }
     while(scope >= 0);
@@ -148,10 +157,25 @@ static int newlocal(void) {
 // Return the slot number in the symbol table
 int addlocal(std::string name, int type, int stype) {
     int y;
+    // If it's in the current scope already, return it 
+    if ((y = findlocal(name, Index_scope)) != -1)
+        return (y);
 
     // If this is already in the symbol table, return the existing slot
-    if ((y = findlocal(name)) != -1)
-        return (y);
+    // if ((y = findlocal(name)) != -1)
+    //     return (y);
+    // Erroneous when we meet homonymous varibales of different scopes
+    // With findlocal(name) we are always returning the one of old scope
+    // By adding directly we are just doing the job name hiding
+    // (a, 0), (a, 1), (a, 2) can be coexistent as we wish
+    // But we need to be wary of redeclarations in the same scope!!!
+    // int a;
+    // a = 0;
+    // int a = 1; // redeclaration of a
+    // Without findlocal(name), we are always inserting a of the same scope
+    // In IDs it merely changes (name, Index_scope)'s corresponding value
+    // In IDtab however it inserts the same symbol repetitively
+    // Resulting in a lonely symbol just like an orphan :( 
 
     // Otherwise get a new slot, fill it in and
     // return the slot number
@@ -176,8 +200,8 @@ static int newpara(void) {
 int addpara(std::string name, int type, int stype) {
     int y;
 
-    // If this is already in the symbol table, return the existing slot
-    if ((y = findlocal(name)) != -1)
+    // If it's in the current scope already, return it
+    if ((y = findlocal(name, Index_scope)) != -1)
         return (y);
 
     // Otherwise get a new slot, fill it in and
@@ -198,6 +222,9 @@ int addpara(const char* name) {
 
 void pass_scope(int scope)
 {
+    /*
+    printf("Index_scope: Before:%d\n", Index_scope);
+    */
     if(scope < Index_scope) // Exiting a scope, from inner to outer
     {
         // Erase all of Index_scope
@@ -206,10 +233,13 @@ void pass_scope(int scope)
         {
             Index_scope = scope;
             Scope_begin = Index + Index_para; // Seems redundant
+            /*
+            printf("Index_scope: After:%d\n", Index_scope);
+            */
             return;
         }
         /*
-        printf("Index_Para: %d\n", Index_para);
+        printf("Index_para: %d\n", Index_para);
         printf("IDtab before deletion: \n");
         for (auto const& id : IDtab)
             std::cout<<id.name<<" ";
@@ -242,12 +272,15 @@ void pass_scope(int scope)
         /*
         printf("IDs after deletion: \n");
         for (auto const& id : IDs)
-            std::cout<<id.first.first<<" ";
+            std::cout<<'('<<id.first.first<<','<<id.first.second<<") ";
         std::cout<<std::endl;
         */
     }
     Index_scope = scope;
     Scope_begin = Index + Index_para;
+    /*
+    printf("Index_scope: After:%d\n", Index_scope);
+    */
     //std::cout<<Scope_begin<<std::endl;
 }
 
