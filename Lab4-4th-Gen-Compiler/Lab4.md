@@ -77,8 +77,8 @@ Flex 和 Bison 是 Linux 下生成词法分析器和语法分析器的工具，�
 ## Regex
 
 > Some people, when confronted with a problem, think
->	“I know, I'll use regular expressions.”   Now they have two problems.
->			– [Jamie Zawinski](https://en.wikiquote.org/wiki/Jamie_Zawinski)
+>    “I know, I'll use regular expressions.”   Now they have two problems.
+>            – [Jamie Zawinski](https://en.wikiquote.org/wiki/Jamie_Zawinski)
 
 [Regular expressions library (since C++11)](https://en.cppreference.com/w/cpp/regex)
 
@@ -102,23 +102,21 @@ Regular expressions actually aren't part of ANSI C. It sounds like you might be 
 
 <ctype.h> & <cctype>
 
-```C
+```c
 int isspace( int ch );
 ```
 
 Checks if the given character is either
 
 * A standard white-space character:
-
 - - Space (`0x20`, ' '),
   - Form feed (`0x0c`, '\f'),
   - Line feed (`0x0a`, '\n'),
   - Carriage return (`0x0d`, '\r'),
   - Horizontal tab (`0x09`, '\t'),
   - Vertical tab (`0x0b`, '\v'),
-
 * Or a locale-specific white-space character.
-
+  
   The behavior is undefined if the value of `ch` is not representable as unsigned char and is not equal to [EOF](https://en.cppreference.com/w/c/io "c/io").
 
 ## Scanner(Lexical Analysis, 词法分析)[^lex]
@@ -134,12 +132,14 @@ When the generated scanner is run, it analyzes its input looking for strings whi
 ### noyywrap
 
 lex 文件中需要添加此行：
+
 ```Flex
 %option noyywrap
 ```
 
 否则：
-```Bash
+
+```bash
 C:\Users\dell\Documents\GitHub\Compiler_Construction\Lab1-1st-Gen-Compiler\src\Scanner>gcc lex.yy.c -o Scanner_Generated.exe
 C:/Program Files/TDM-GCC-64/bin/../lib/gcc/x86_64-w64-mingw32/10.3.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\dell\AppData\Local\Temp\ccYjQcTm.o:lex.yy.c:(.text+0x543): undefined reference to `yywrap'
 C:/Program Files/TDM-GCC-64/bin/../lib/gcc/x86_64-w64-mingw32/10.3.0/../../../../x86_64-w64-mingw32/bin/ld.exe: C:\Users\dell\AppData\Local\Temp\ccYjQcTm.o:lex.yy.c:(.text+0x114a): undefined reference to `yywrap'
@@ -236,17 +236,19 @@ You don't match C style comments with a simple regular expression in Flex; they 
 https://stackoverflow.com/questions/4755956/unix-flex-regex-for-multi-line-comments
 
 > 零宽断言的英文是 "zero-width assertion"。在正则表达式中，零宽断言允许我们对字符串中的字符进行位置上的断言，而不消耗任何字符（即不移动匹配指针）。这意味着零宽断言用于检查某个模式是否存在，而不会将该模式作为匹配结果的一部分。常见的零宽断言包括：
+> 
 > * 零宽正向先行断言 (Positive Lookahead): `(?=pattern)`
 > * 零宽负向先行断言 (Negative Lookahead): `(?!pattern)`
 > * 零宽正向后发断言 (Positive Lookbehind): `(?<=pattern)`
 > * 零宽负向后发断言 (Negative Lookbehind): `(?<!pattern)`
-> Flex不支持零宽断言主要是因为Flex的设计初衷和实现方式。Flex是一个用于生成词法分析器的工具，其设计重点在于高效地从左到右扫描输入文本，逐个字符地匹配模式，并执行相应的动作代码。Flex的匹配机制基于最长匹配原则，即在给定位置上，它会尝试匹配最长的模式。
-> 零宽断言是正则表达式中的一个高级特性，允许进行复杂的模式匹配，而不改变正在扫描的文本的当前位置。这种特性在某些正则表达式引擎中得到支持，特别是那些更侧重于字符串处理和模式搜索的引擎。然而，Flex作为一个词法分析器生成器，其目标是高效地执行简单的模式匹配并将输入文本转换为标记（token），而不是提供复杂的正则表达式处理能力。
-> 因此，Flex的正则表达式支持相对简单，主要聚焦于满足词法分析过程中的需要，包括字符匹配、模式组合以及简单的条件分支，而不是提供完整的正则表达式引擎功能。这意味着一些正则表达式的高级特性，如零宽断言，不在Flex直接支持的范围内。 **⚠️ ChatGPT 4 生成（待考）**
+>   Flex不支持零宽断言主要是因为Flex的设计初衷和实现方式。Flex是一个用于生成词法分析器的工具，其设计重点在于高效地从左到右扫描输入文本，逐个字符地匹配模式，并执行相应的动作代码。Flex的匹配机制基于最长匹配原则，即在给定位置上，它会尝试匹配最长的模式。
+>   零宽断言是正则表达式中的一个高级特性，允许进行复杂的模式匹配，而不改变正在扫描的文本的当前位置。这种特性在某些正则表达式引擎中得到支持，特别是那些更侧重于字符串处理和模式搜索的引擎。然而，Flex作为一个词法分析器生成器，其目标是高效地执行简单的模式匹配并将输入文本转换为标记（token），而不是提供复杂的正则表达式处理能力。
+>   因此，Flex的正则表达式支持相对简单，主要聚焦于满足词法分析过程中的需要，包括字符匹配、模式组合以及简单的条件分支，而不是提供完整的正则表达式引擎功能。这意味着一些正则表达式的高级特性，如零宽断言，不在Flex直接支持的范围内。 **⚠️ ChatGPT 4 生成（待考）**
 
 > Flex在处理输入时遵循最长匹配原则，如果有多个规则都能匹配当前的输入，Flex会选择匹配最长字符串的规则。在上面的规则中，`int`作为一个完整的单词将优先匹配其对应的规则并返回`INT`，而像`integer`这样的字符串将被识别为`IDENTIFIER`。
 > 通过这种方式，即使Flex本身不支持正则表达式中的零宽断言，你也能通过精心设计匹配规则来区分关键字和其他标识符。这个逻辑完全在Flex的词法分析阶段处理，而不需要借助Bison的语法分析功能。 **⚠️ ChatGPT 4 生成（待考）**
-```C
+
+```c
 "int"             { return INT; }
 [a-zA-Z_][a-zA-Z0-9_]*   { return IDENTIFIER; }
 ```
@@ -292,7 +294,7 @@ Flex lets you say `%option nodefault` at the top of the scanner to tell it not t
 The `%yylineno` option tells flex to define an integer variable called `yylineno` and to maintain the current line number in it. What that means is that every time the scanner reads a newline character, it increments `yylineno`, and if the scanner backs up over a newline (using some features we’ll get to later), it decrements it. It’s still up to you to initialize `yylineno` to 1 at the beginning of each file and to save and restore it if you’re handling include files. Even with those limitations, it’s still easier than doing line numbers by hand. (In this example, there’s only a single pattern that matches `\n`, which wouldn’t be hard to get right, but it’s quite common to have several patterns that match, causing hard-to-track bugs when some but not all of them update the line number.) P32
 
 ### Concordance
-	
+
 语境共现/定位索引
 
 并列索引（港）
@@ -309,13 +311,13 @@ http://www.elephant.org.il/indexing/index-vs-concordance
 
 At the moment, flex only generates 8-bit scanners which basically limits you to use UTF-8. So if you have a pattern:
 
-```C
+```c
 肖晗   { printf ("xiaohan\n"); }
 ```
 
 it will work as expected, as the sequence of bytes in the pattern and in the input will be the same. What's more difficult is character classes. If you want to match either the character 肖 or 晗, you can't write:
 
-```C
+```c
 [肖晗]   { printf ("xiaohan/2\n"); }
 ```
 
@@ -326,7 +328,8 @@ because this will match each of the six bytes 0xe8, 0x82, 0x96, 0xe6, 0x99 and 0
 ### rule cannot be matched
 
 误将顺序放成如下形式：
-```C
+
+```c
 [_[:alpha:]][_[:alnum:]]*     {
                     //chars += yyleng;
                     //printf("Identifier\n");
@@ -346,7 +349,7 @@ because this will match each of the six bytes 0xe8, 0x82, 0x96, 0xe6, 0x99 and 0
 
 Harking back to the earliest versions of lex, unless you tell it otherwise, flex acts as though there is a default rule at the end of the scanner that copies otherwise unmatched input to `yyout`.
 
-```C
+```c
 . ECHO;
 #define ECHO fwrite( yytext, yyleng, 1, yyout )
 ```
@@ -367,9 +370,10 @@ Also, don't use it in bison, instead use `$n` where `n` is the position of the t
 
 So in the *flex* file, if you want to capture the text do something like
 
-```C
+```c
 [A-Za-z]+               { yylval.name = strdup(yytext); return NAMETOKEN; }
 ```
+
 and remember, do not use `yytext` in *bison*, it's an internal thing used by the lexer.
 
 [Flex/Bison: yytext skips over a value](https://stackoverflow.com/questions/49331561/flex-bison-yytext-skips-over-a-value)[](https://stackoverflow.com/posts/22437970/timeline)
@@ -378,14 +382,16 @@ You have to copy yytext, it's an internal buffer in flex.
 
 I.e., instead of
 
-```C
+```c
 {ID}        { yylval.id = yytext; return ID; }
 ```
+
 something like:
 
 ```c
 {ID}    {yylval.id = malloc(yyleng + 1); strcpy(yylval.id, yytext); return ID;}
 ```
+
 Obviously that's not robust, since it doesn't do error checking, and you have to deal with freeing the memory in the parser that doesn't end up in a tree, and deal with freeing it from the tree, etc. But that is the basic idea.
 
 `yylval.id = strdup(yytext);` is a lot simpler, and less accident-prone. You still need to `free` the returned value, of course.
@@ -433,7 +439,8 @@ Bison为每条规则分配了右侧最右边标记的优先级；如果该标记
 ![op_associativity.png](./img/op_associativity.png)[^op_p&a]
 
 起初没有将算符的优先级列全：
-```C
+
+```c
 %nonassoc <fn> CMP
 %right '='
 %left '+' '-'
@@ -442,7 +449,8 @@ Bison为每条规则分配了右侧最右边标记的优先级；如果该标记
 ```
 
 这时会报错：
-```Bash
+
+```bash
 C:\Users\dell\Documents\GitHub\Compiler_Construction\Lab2-2nd-Gen-Compiler\src\Flex_Bison>win_bison -d MyBison.y
 MyBison.y: warning: 13 shift/reduce conflicts [-Wconflicts-sr]
 MyBison.y: note: rerun with option '-Wcounterexamples' to generate conflict counterexamples
@@ -462,13 +470,13 @@ MyBison.y: note: rerun with option '-Wcounterexamples' to generate conflict coun
 
 https://chatgpt.com/share/5618789d-62e3-4bb2-be6e-1f58ee2f8f85
 
-```C
+```c
 list: /* nothing */ { $$ = NULL; }
-	| stmt ';' list { if ($3 == NULL)
-							$$ = $1;
-						else
-							$$ = newast('L', $1, $3);
-					}
+    | stmt ';' list { if ($3 == NULL)
+                            $$ = $1;
+                        else
+                            $$ = newast('L', $1, $3);
+                    }
 ;
 ```
 
@@ -478,7 +486,7 @@ One disadvantage of right recursion rather than left is that right recursion put
 
 Flex & Bison P66
 
-```C
+```c
 exprlist: exprlist ',' expr ; /* left recursion */
 
 exprlist: expr ',' exprlist ; /* right recursion */
@@ -490,7 +498,7 @@ Right-recursive grammars can be useful for a list of items that you know will be
 
 ```c
 thinglist: THING { $$ = $1; }
-		 | THING thinglist { $1->next = $2; $$ = $1; }
+         | THING thinglist { $1->next = $2; $$ = $1; }
 ;
 ```
 
@@ -520,7 +528,7 @@ LL (topdown) parsing uses lookahead to *predict* which production will be reduce
 
 [Left/Right recursion and Bison parsing stack behavior](https://stackoverflow.com/questions/48604590/left-right-recursion-and-bison-parsing-stack-behavior)
 
-```C
+```c
 e → e PLUS t
 e → t 
 t → t TIMES f
@@ -546,13 +554,128 @@ This bottom-up operation may seem strange to you, but in general is more powerfu
 
 [Bison / Flex processes tokens in reverse order](https://stackoverflow.com/questions/14867679/bison-flex-processes-tokens-in-reverse-order)
 
+### dangling else & reduce/reduce & shift/reduce conflicts
+
+一波三折……
+
+```c
+procedure   : VOID ID '(' { is_main = 0; genfuncpreamble($2, P_VOID); } ')' '{' stmts '}'          {genfuncpostamble();}
+            | VOID ID '(' { is_main = 0; genfuncpreamble($2, P_VOID); /*para_num = 0;*/ } paralist ')' '{' stmts '}' {genfuncpostamble();}
+            | INT ID '(' { is_main = 0; genfuncpreamble($2, P_INT); } ')' '{' stmts '}'            {genfuncpostamble();}
+            | INT ID '(' { is_main = 0; genfuncpreamble($2, P_INT); /*para_num = 0;*/ } paralist ')' '{' stmts '}'   {genfuncpostamble();}
+            | INT MAIN '(' ')' { is_main = 1; genmainpreamble(); } '{' stmts '}'   {}
+            | INT MAIN '(' INT ID ',' INT ID ')' { is_main = 1; genmainpreamble(); para_declaration($5); para_declaration($8); } '{' stmts '}' {}
+;
+if_statement : IF '(' exp ')' { printf("true\n"); } stmt
+
+             | IF '(' exp ')' { printf("true\n"); } stmt ELSE stmt { printf("false\n"); }
+;
+```
+
+```bash
+MyBison.y: warning: 6 reduce/reduce conflicts [-Wconflicts-rr]
+MyBison.y: warning: reduce/reduce conflict on tokens ID, PRINTLN_INT, IF, RETURN, INT, '{' [-Wcounterexamples]
+  First example: $@1 VOID ID '(' $@2 ')' '{' IF '(' exp ')' . ID '=' exp ';' '}' $end
+  First reduce derivation
+    $accept
+    `-> 0: program                                                                                                                      $end
+           `-> 2: $@1 procedure
+                      `-> 5: VOID ID '(' $@2 ')' '{' stmts                                                                          '}'
+                                                     `-> 18: stmt
+                                                             `-> 29: if_statement
+                                                                     `-> 25: IF '(' exp ')' $@8              stmt
+                                                                                            `-> 24: %empty . `-> 33: ID '=' exp ';'
+  Second example: $@1 VOID ID '(' $@2 ')' '{' IF '(' exp ')' . ID '=' exp ';' ELSE stmt '}' $end
+  Second reduce derivation
+    $accept
+    `-> 0: program                                                                                                                                $end
+           `-> 2: $@1 procedure
+                      `-> 5: VOID ID '(' $@2 ')' '{' stmts                                                                                    '}'
+                                                     `-> 18: stmt
+                                                             `-> 29: if_statement
+                                                                     `-> 27: IF '(' exp ')' $@9              stmt                   ELSE stmt
+                                                                                            `-> 26: %empty . `-> 33: ID '=' exp ';'
+MyBison.y:197.31-51: warning: rule useless in parser due to conflicts [-Wother]
+  197 |              | IF '(' exp ')' { printf("true\n"); } stmt ELSE stmt { ...
+      |
+```
+
+去掉 `{ printf("true\n"); }` 后：
+
+```c
+if_statement : IF '(' exp ')' stmt {}
+             | IF '(' exp ')' stmt ELSE stmt { printf("false\n"); }
+;
+```
+
+```bash
+MyBison.y: warning: 1 shift/reduce conflict [-Wconflicts-sr]
+MyBison.y: warning: shift/reduce conflict on token ELSE [-Wcounterexamples]
+  Example: IF '(' exp ')' IF '(' exp ')' stmt . ELSE stmt
+  Shift derivation
+    if_statement
+    `-> 29: IF '(' exp ')' stmt
+                           `-> 31: if_statement
+                                   `-> 30: IF '(' exp ')' stmt . ELSE stmt
+  Reduce derivation
+    if_statement
+    `-> 30: IF '(' exp ')' stmt                                  ELSE stmt
+                           `-> 31: if_statement
+                                   `-> 29: IF '(' exp ')' stmt .
+```
+
+[Shift/Reduce (Bison 3.8.1)](https://www.gnu.org/software/bison/manual/html_node/Shift_002fReduce.html)
+
+[Precedence Only (Bison 3.8.1)](https://www.gnu.org/software/bison/manual/html_node/Precedence-Only.html)
+
+[Solving dangling else with bison - Stack Overflow](https://stackoverflow.com/questions/17010362/solving-dangling-else-with-bison)
+
+[if statement - Bison dangling else - Stack Overflow](https://stackoverflow.com/questions/16193214/bison-dangling-else)
+
+```c
+if_statement : IF '(' exp {genAST($3);} ')' stmt %prec THEN {}
+             | IF '(' exp {genAST($3);} ')' stmt ELSE stmt { printf("false\n"); }
+;
+
+```
+
+```bash
+MyBison.y: warning: 1 reduce/reduce conflict [-Wconflicts-rr]
+MyBison.y: warning: reduce/reduce conflict on token ')' [-Wcounterexamples]
+time limit exceeded: 6.000000
+  First example: $@1 VOID ID '(' $@2 ')' '{' $@8 IF '(' exp . ')' stmt $@9 '}' $end
+  First reduce derivation
+    $accept
+    `-> 0: program                                                                                                                    $end
+           `-> 2: $@1 procedure
+                      `-> 5: VOID ID '(' $@2 ')' compound_statement
+                                                 `-> 21: '{' $@8 stmts                                                        $@9 '}'
+                                                                 `-> 22: stmt
+                                                                         `-> 33: if_statement
+                                                                                 `-> 30: IF '(' exp $@10             ')' stmt
+                                                                                                    `-> 29: %empty .
+  Second example: $@1 VOID ID '(' $@2 ')' '{' $@8 IF '(' exp . ')' stmt ELSE stmt $@9 '}' $end
+  Second reduce derivation
+    $accept
+    `-> 0: program                                                                                                                              $end
+           `-> 2: $@1 procedure
+                      `-> 5: VOID ID '(' $@2 ')' compound_statement
+                                                 `-> 21: '{' $@8 stmts                                                                  $@9 '}'
+                                                                 `-> 22: stmt
+                                                                         `-> 33: if_statement
+                                                                                 `-> 32: IF '(' exp $@11             ')' stmt ELSE stmt
+                                                                                                    `-> 31: %empty .
+MyBison.y:206.27-39: warning: rule useless in parser due to conflicts [-Wother]
+  206 |              | IF '(' exp {genAST($3);} ')' stmt ELSE stmt { printf("...
+```
+
 ## Elaborator(Semantic Analysis, 语义分析)[^ela]
 
-### Clang 
+### Clang
 
 After that you can use clang to compile C to mips assembly by doing something like:
 
-```Bash
+```bash
 clang -target mipsel-linux-gnu foo.c -S -o -
 ```
 
@@ -560,7 +683,7 @@ which will compile the file "foo.c" to 32-bit mips assembly for the linux operat
 
 https://stackoverflow.com/questions/41988604/c-code-to-mips-assembly-using-llvm
 
-```Bash
+```bash
 main.c:1:9: fatal error: 'stdio.h' file not found
     1 | #include<stdio.h>
       |         ^~~~~~~~~
@@ -577,7 +700,7 @@ https://discourse.llvm.org/t/fatal-error-stdio-h-file-not-found/65271/6
 
 电脑上有 MinGW 有 GCC 可用，试着添到系统路径里。
 
-```Bash
+```bash
 C:\Users\dell\Documents\GitHub\Compiler_Construction\Lab1-1st-Gen-Compiler\src>echo | gcc -E -Wp,-v -
 ignoring duplicate directory "C:/Program Files/TDM-GCC-64/lib/gcc/../../lib/gcc/x86_64-w64-mingw32/10.3.0/include"
 ignoring duplicate directory "C:/Program Files/TDM-GCC-64/lib/gcc/../../lib/gcc/x86_64-w64-mingw32/10.3.0/../../../../include"
@@ -617,7 +740,7 @@ http://gcc.gnu.org/onlinedocs/gcc/Environment-Variables.html
 
 成功收获更多 errors & warnings
 
-```Bash
+```bash
 C:\Program Files\TDM-GCC-64\x86_64-w64-mingw32\include\_mingw.h:272:2: error: Only Win32 target is supported!
   272 | #error Only Win32 target is supported!
       |  ^

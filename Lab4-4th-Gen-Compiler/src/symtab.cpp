@@ -102,7 +102,7 @@ static vector<symbol> FUNCtab;
 static int Index = 0;		// 统计局部变量（不含参数）个数，便于栈操作。
 static int Index_para = 0;  // 统计参数个数，衔接 map 与 vector。
 static int Index_func = 0;  // 统计函数个数。
-static int Index_scope = 0; // 当前作用域序号，从 0 开始。
+static int Index_scope = 0; // 当前作用域序号，现在刚进入函数时为 1。
 static int Scope_begin = 0; // 当前作用域首个变量的序号-1，也即此前作用域变量总数
 
 // Must be put before its caller if not declared.
@@ -220,8 +220,30 @@ int addpara(const char* name) {
     return addpara(std::string(name), P_INT, S_VAR);
 }
 
+// 用于各函数代码生成后，其作用域中局部变量（含形参）的清理。
+// 必须放在 pass_scope 之前
+static void clearlocal()
+{
+    IDs.clear();
+    IDtab.clear();
+    Index = 0;
+    Index_para = 0;
+    Index_scope = 0; // Redundant
+    Scope_begin = 0;
+}
+
 void pass_scope(int scope)
 {
+    // 现在 MyBison.y 中 scope = 0 是不在函数的情形，
+    // 没必要再特意清理，函数进入之时（！）会调用 clearlocal();
+    // 在“函数进入之时”调用需要谨慎，或者是放在 compound_statement 后？
+    // 或者直接在 pass_scope 这里清理掉吧，因为 pass_scope 可以作为判断函数的出入。
+    // 此处能够接收到 0，说明是函数离开之时。
+    if(scope == 0)
+    {
+        clearlocal();
+        return;
+    }
     /*
     printf("Index_scope: Before:%d\n", Index_scope);
     */
@@ -284,15 +306,6 @@ void pass_scope(int scope)
     //std::cout<<Scope_begin<<std::endl;
 }
 
-void clearlocal()
-{
-    IDs.clear();
-    IDtab.clear();
-    Index = 0;
-    Index_para = 0;
-    Index_scope = 0; // Redundant
-}
-
 int findfunc(std::string name)
 {
     auto it = FUNCs.find(name);
@@ -310,15 +323,17 @@ int findfunc(const char* name)
 // Temporarily Useless...
 int functype(int value)
 {
-    if(value <= 0 || value >= FUNCtab.size())
+    if(value <= 0 || value > FUNCtab.size()) // 后者误加等号
         return -1;            
     return FUNCtab[value-1].type;
 }
 
 std::string funcname(int value)
 {
-    if(value <= 0 || value >= FUNCtab.size())
-        return std::string("");            
+    // std::cout<<"value = "<<value<<std::endl;
+    if(value <= 0 || value > FUNCtab.size()) // 后者误加等号
+        return std::string(""); 
+               
     return FUNCtab[value-1].name;
 }
 

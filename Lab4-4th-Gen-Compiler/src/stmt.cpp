@@ -110,6 +110,30 @@ void return_statement(struct ASTnode *exp)
     }
 }
 
+void condition(struct ASTnode *exp, int type, int num)
+{
+    // type = 1: if
+    // type = 2: while (loop?)
+    // 处理表达式
+    if(exp->op == A_INTLIT)
+    {
+        cout<<"li $v0, "<<exp->v.intvalue<<endl;
+    }
+    else if(exp->op == A_IDENT)
+    {
+        cout<<"lw $v0, "<<-4*exp->v.intvalue<<"($fp)"<<endl;
+    }
+    else
+    {
+        genAST(exp);
+        cout<<"lw $v0, 0($sp)"<<endl;
+    }
+    if(type == 1)
+        cout<<"beq $v0, $zero, $if_false_"<<num<<endl; // 拷贝实验说明时 $t0 忘了改了
+    else if(type == 2)
+        cout<<"beq $v0, $zero, $loop_end_"<<num<<endl;
+}
+
 void exit_syscall()
 {
     cout<<"move $v1, $v0"<<endl; // Seems useless, usage unknown.

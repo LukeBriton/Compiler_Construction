@@ -130,7 +130,7 @@ void cgfunccall(int value)
 void cgfuncpreamble(const char* name, int type)
 {
     addfunc(name, type);
-    clearlocal();
+    // clearlocal();
     cout << ".globl " << name << "\n\n";
     cout << name << ":\n";
     cout << "addiu $sp, $sp, -8 # 为保存寄存器分配空间\n"; // 实验说明上的写法是 -4，详见 arg_pass
@@ -155,7 +155,7 @@ void cgfuncpostamble()
 
 void cgmainpreamble() {
     // 暂时不考虑调用 main 函数的情况
-    clearlocal();
+    // clearlocal();
     cout<<".globl main # 声明 main 函数为全局符号，使得模拟器能识别程序的入口点"<<endl<<endl;
     cout<<"main:"<<endl;
     cout<<"move $fp, $sp # 设置帧指针"<<endl;

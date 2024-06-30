@@ -57,15 +57,21 @@ extern int yydebug;
     INTLIT = 258,                  /* INTLIT  */
     ID = 259,                      /* ID  */
     PRINTLN_INT = 260,             /* PRINTLN_INT  */
-    RETURN = 261,                  /* RETURN  */
-    MAIN = 262,                    /* MAIN  */
-    INT = 263,                     /* INT  */
-    VOID = 264,                    /* VOID  */
-    LOR = 265,                     /* LOR  */
-    LAND = 266,                    /* LAND  */
-    EQN = 267,                     /* EQN  */
-    LGTE = 268,                    /* LGTE  */
-    UMINUS = 269                   /* UMINUS  */
+    IF = 261,                      /* IF  */
+    ELSE = 262,                    /* ELSE  */
+    WHILE = 263,                   /* WHILE  */
+    BREAK = 264,                   /* BREAK  */
+    CONTINUE = 265,                /* CONTINUE  */
+    RETURN = 266,                  /* RETURN  */
+    MAIN = 267,                    /* MAIN  */
+    INT = 268,                     /* INT  */
+    VOID = 269,                    /* VOID  */
+    THEN = 270,                    /* THEN  */
+    LOR = 271,                     /* LOR  */
+    LAND = 272,                    /* LAND  */
+    EQN = 273,                     /* EQN  */
+    LGTE = 274,                    /* LGTE  */
+    UMINUS = 275                   /* UMINUS  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -74,14 +80,14 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 28 "MyBison.y"
+#line 32 "MyBison.y"
 
     struct ASTnode *a;
     int intval;
     const char* s; /* which symbol */
     int fn; /* which function */
 
-#line 85 "MyBison.tab.h"
+#line 91 "MyBison.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

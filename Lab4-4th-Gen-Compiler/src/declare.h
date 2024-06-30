@@ -76,6 +76,7 @@ void var_declaration(const char* name);
 void para_declaration(const char* name);
 void assignment_statement(const char* name, struct ASTnode *exp);
 void return_statement(struct ASTnode *exp);
+void condition(struct ASTnode *exp, int type, int num);
 void exit_syscall(void);
 void arg_pass(struct ASTnode *exp);
 int get_arg_num(void);
@@ -88,7 +89,7 @@ int findlocal(const char* name);
 int addlocal(const char* name);
 int addpara(const char* name);
 void pass_scope(int scope);
-void clearlocal(void);						// 用于各函数代码生成后，其作用域中局部变量（含形参）的清理。
+// void clearlocal(void);					// 隔离在 symtab.cpp 
 int findfunc(const char* name);
 int functype(int value);
 std::string funcname(int value);			// 用于 AST 中作为表达式的函数调用

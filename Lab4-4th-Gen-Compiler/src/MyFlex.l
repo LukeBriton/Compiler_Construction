@@ -46,14 +46,18 @@
     /* 关键字： int, return, main(?) */
 
     /* keywords */
-    /* "if" { return IF; } */
     /* TODO */
     /* In languages that don’t have a THEN keyword... */
     /* flex & bison P188 */
     /* "then" { return THEN; } */
-    /* "else" { return ELSE; } */
-    /* "while" { return WHILE; } */
     /* "do" { return DO; } */
+"if" { return IF; }
+"else" { return ELSE; }
+"while" { return WHILE; }
+
+"break" { return BREAK; }
+"continue" { return CONTINUE;}
+
 "return" { return RETURN; }
 "main" { return MAIN; }
 

@@ -18,6 +18,10 @@ int arg_num = 0;    // 可以方便 arg_pass
 // int para_num = 0;// 方便 para_declaration -> 被 symtab.cpp Index_para 取代
 int is_main = 0;    // 只在返回时有用，为 0 是一般 func，为 1 是 main。
 int scope = 0;      // scope 为当前作用域序号，从 0 开始，0 即为默认函数作用域。
+int if_num = 0;
+int if_nested = 0;
+int loop_num = 0;
+int loop_nested = 0;
 %}
 
 /*
@@ -39,13 +43,14 @@ int scope = 0;      // scope 为当前作用域序号，从 0 开始，0 即为�
 %token PRINTLN_INT
 // %token CRLF
 
-// %token IF THEN ELSE WHILE DO 
+%token IF ELSE WHILE
+%token BREAK CONTINUE 
 %token RETURN MAIN
 
 %token INT VOID
 
-
-
+%nonassoc THEN
+%nonassoc ELSE
 
 /* Operator Precedence */
 /* 应列尽列，否则会：
@@ -123,12 +128,12 @@ program : { genpreamble(); } procedure      {}
 // 不考虑 VOID 类型 return; 和 INT 类型没有 return 的情况。
 // 总之，只考虑正确输入。
 // 繁冗，待优化。
-procedure   : VOID ID '(' { is_main = 0; genfuncpreamble($2, P_VOID); } ')' '{' stmts '}'          {genfuncpostamble();}
-            | VOID ID '(' { is_main = 0; genfuncpreamble($2, P_VOID); /*para_num = 0;*/ } paralist ')' '{' stmts '}' {genfuncpostamble();}
-            | INT ID '(' { is_main = 0; genfuncpreamble($2, P_INT); } ')' '{' stmts '}'            {genfuncpostamble();}
-            | INT ID '(' { is_main = 0; genfuncpreamble($2, P_INT); /*para_num = 0;*/ } paralist ')' '{' stmts '}'   {genfuncpostamble();}
-            | INT MAIN '(' ')' { is_main = 1; genmainpreamble(); } '{' stmts '}'   {}
-            | INT MAIN '(' INT ID ',' INT ID ')' { is_main = 1; genmainpreamble(); para_declaration($5); para_declaration($8); } '{' stmts '}' {}
+procedure   : VOID ID '(' { is_main = 0; genfuncpreamble($2, P_VOID); } ')' compound_statement                            {genfuncpostamble();}
+            | VOID ID '(' { is_main = 0; genfuncpreamble($2, P_VOID); /*para_num = 0;*/ } paralist ')' compound_statement {genfuncpostamble();}
+            | INT ID '(' { is_main = 0; genfuncpreamble($2, P_INT); } ')' compound_statement                              {genfuncpostamble();}
+            | INT ID '(' { is_main = 0; genfuncpreamble($2, P_INT); /*para_num = 0;*/ } paralist ')' compound_statement   {genfuncpostamble();}
+            | INT MAIN '(' ')' { is_main = 1; genmainpreamble(); } compound_statement   {}
+            | INT MAIN '(' INT ID ',' INT ID ')' { is_main = 1; genmainpreamble(); para_declaration($5); para_declaration($8); } compound_statement {}
 
         // The names are just a well-established convention
         // https://stackoverflow.com/questions/11489387/is-it-compulsory-to-write-int-mainint-argc-char-argv-cant-use-some-other
@@ -154,6 +159,10 @@ paralist : INT ID { /*para_num++;*/ /*printf("%s\n", $2);*/ para_declaration($2)
          | paralist ',' INT ID { /*para_num++;*/ /*printf("%s\n", $4);*/ para_declaration($4);/*, para_num);*/ /*printf("%d\n", findlocal($4));*/ } // 左递归
          // 输出顺序：a, b, c, d 
 ; 
+
+compound_statement: '{' '}' {}          // empty, i.e. no statement
+|      '{' { scope++; pass_scope(scope); /*printf("%d\n", scope);*/ } stmts { scope--; pass_scope(scope); /*printf("%d\n", scope);*/ } '}'        {}
+;
 
 // Parse one or more statements
 // Bison handles left recursion much more efficiently than right recursion.
@@ -184,17 +193,39 @@ stmts   : stmt          {}
  * https://westes.github.io/flex/manual/A-Note-About-yytext-And-Memory.html
  */
 
-declarations : INT identifier               {}
-            | declarations ',' identifier   {}
+// https://en.cppreference.com/w/c/language/declarations
+declaration : declarators ';'               {}
 ;
 
-identifier  : ID            { var_declaration($1); }
+declarators : INT declarator                {}
+            | declarators ',' declarator    {}
+;
+
+declarator  : ID            { var_declaration($1); }
             | ID '=' exp    { var_declaration($1); assignment_statement($1, $3); }
 ;
 
-// 仅有成对花括号的情形尚未支持。
-stmt : declarations ';'     {}
-     | '{' { scope++; pass_scope(scope); /*printf("%d\n", scope);*/ } stmts { scope--; pass_scope(scope); /*printf("%d\n", scope);*/ } '}'        {}
+// https://chatgpt.com/share/2c21c2a5-e6d1-44a4-a459-51ae52b8ec9f
+
+// 条件表达式为 0 => 跳转 （需要 if_ ）
+// 否则正常执行（也就不需要 if_true_i 的标签）
+if_statement : if_true %prec THEN { printf("\n$if_end_%d:\n", if_nested); if_nested --; }
+             | if_true ELSE { /*printf("if_false_%d:\n\n\n", ++if_false_num);*/ } stmt { printf("\n$if_end_%d:\n", if_nested); if_nested --; /*printf("false\n");*/ }
+;
+
+// 统一按照跳转至 if_false_N 即可。
+if_true      : IF '(' exp { if_num ++; if_nested = if_num; condition($3, 1, if_nested); } ')' { /*printf("true\n");*/ } stmt { printf("j $if_end_%d\n", if_nested); printf("\n$if_false_%d:\n", if_nested); }
+;
+
+loop : WHILE '(' { loop_num ++; loop_nested = loop_num; printf("\n$loop_%d:\n", loop_nested); } exp { condition($4, 2, loop_nested); } ')' stmt { printf("j $loop_%d\n", loop_nested); printf("\n$loop_end_%d:\n", loop_nested); loop_nested --; }
+;
+
+stmt : declaration          {}
+     | compound_statement   {}
+     | if_statement         {}
+     | loop                 {}
+     | BREAK ';'            { printf("\nj $loop_end_%d\n", loop_nested); }
+     | CONTINUE ';'         { printf("\nj $loop_%d\n", loop_nested); }
      | ID '=' exp ';'       { assignment_statement($1, $3); }
         /* The parser doesn't know which rule to take --until it's
          * parsed the next token to see if it is a '='. By the time
@@ -207,6 +238,8 @@ stmt : declarations ';'     {}
         return_statement($2);
         if (is_main == 1)
             exit_syscall();
+        else if (is_main == 0)
+            genfuncpostamble();
         }
      //| ID '(' { arg_num = 0; } arglist ')' ';' {
      | ID '(' arglist ')' ';' {
