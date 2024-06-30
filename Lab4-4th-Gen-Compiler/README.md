@@ -431,7 +431,7 @@ Each compound statement introduces its own [block scope](https://en.cppreference
 
 The initializers of the variables with automatic [storage duration](https://en.cppreference.com/w/c/language/storage_duration "c/language/storage duration") declared inside a block and the VLA declarators are executed when flow of control passes over these declarations in order, as if they were statements.
 
-- [ ] `{ statement | declaration...(optional) } (until C23)`
+- [x] `{ statement | declaration...(optional) } (until C23)`
 
 [In c/c++, are block-scope variables stacked only if the block is executed? - Software Engineering Stack Exchange](https://softwareengineering.stackexchange.com/questions/125792/in-c-c-are-block-scope-variables-stacked-only-if-the-block-is-executed)
 
@@ -483,9 +483,9 @@ An expression statement without an expression is called a *null statement*. It i
 
 ### 3. [selection statements](https://en.cppreference.com/w/c/language/statements#Selection_statements)
 
-- [ ] `if ( expression ) statement-true`
+- [x] `if ( expression ) statement-true`
 
-- [ ] `if ( expression ) statement-true else statement-false` -> `if ( expression ) statement-true else if ( expression ) statement-true else statement-false` -> ...
+- [x] `if ( expression ) statement-true else statement-false` -> `if ( expression ) statement-true else if ( expression ) statement-true else statement-false` -> ...
 
 #### Declaration in a condition
 
@@ -530,7 +530,7 @@ GNU C:
 
 ### 4. [iteration statements](https://en.cppreference.com/w/c/language/statements#Iteration_statements)
 
-- [ ] `while ( expression ) statement`
+- [x] `while ( expression ) statement`
 
 - [ ] `do statement while ( expression ) ;` (Optional)
 
@@ -538,11 +538,11 @@ GNU C:
 
 ### 5. [jump statements](https://en.cppreference.com/w/c/language/statements#Jump_statements)
 
-- [ ] `break ;`
+- [x] `break ;` 有缺陷，未确保其在循环或 `switch` 中
 
-- [ ] `continue ;`
+- [x] `continue ;` 同上
 
-- [ ] `return expression(optional) ;`
+- [x] `return expression(optional) ;`
 
 - [ ] `goto identifier ;`
 
